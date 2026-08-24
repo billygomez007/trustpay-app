@@ -1,0 +1,13 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { getPublicSeller, type PublicSeller } from '../../../components/api';
+
+export default function SellerStorefrontPage({ params }: { params: Promise<{ id: string }> }) {
+  const [seller, setSeller] = useState<PublicSeller | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => { void params.then(({ id }) => getPublicSeller(id)).then(setSeller).catch(() => setError(true)); }, [params]);
+  if (!seller) return <main className="marketplace"><header className="market-header"><Link className="market-brand" href="/marketplace"><span>T</span> TrustPay</Link></header><div className="market-empty">{error ? <><strong>Seller profile unavailable</strong><span>This Trust Profile may be private or no longer available.</span><Link href="/marketplace">Return to marketplace →</Link></> : 'Loading seller profile…'}</div></main>;
+  return <main className="storefront"><header className="market-header"><Link className="market-brand" href="/marketplace"><span>T</span> TrustPay</Link><nav><Link href="/marketplace">Marketplace</Link><Link href="/portal">My transactions</Link><Link className="market-signin" href="/sign-in">Sign in</Link></nav></header><section className="storefront-hero"><div className="storefront-avatar">{seller.displayName.slice(0, 1).toUpperCase()}</div><div><span className="verified-badge">✓ {seller.verificationLevel.replaceAll('_', ' ')}</span><h1>{seller.displayName}</h1><p>{seller.country || 'Ghana'} · On TrustPay since {new Date(seller.memberSince).getFullYear()}</p></div></section><section className="storefront-body"><div className="storefront-main"><span className="market-eyebrow">SELLER STOREFRONT</span><h2>Trusted commerce, clearly recorded.</h2><p className="storefront-copy">This seller has opted into a public Trust Profile. Product and service listings will appear here when the marketplace catalog is available.</p><div className="storefront-empty"><span>◇</span><strong>No listings yet</strong><p>TrustPay never invents products, prices, ratings, or availability.</p></div></div><aside className="trust-card"><span className="market-eyebrow">WHY BUYERS TRUST THEM</span><div className="big-score"><strong>{seller.trustScore}</strong><span>Trust score</span></div><div className="trust-line"><span>Verified profile</span><strong>✓</strong></div><div className="trust-line"><span>Completed transactions</span><strong>{seller.completedDeals}</strong></div><div className="trust-line"><span>Average rating</span><strong>{seller.averageRating || '—'}</strong></div><Link href="/portal/deals/create" className="trust-cta">Start a protected Deal <span>→</span></Link></aside></section></main>;
+}

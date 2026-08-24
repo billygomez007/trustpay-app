@@ -1,0 +1,12 @@
+node_modules
+.turbo
+dist
+.next
+.expo
+coverage
+*.log
+.env
+.env.local
+!.env.example
+apps/*/.env
+packages/*/.env

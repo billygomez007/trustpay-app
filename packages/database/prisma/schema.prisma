@@ -1,0 +1,980 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DealType {
+  physical_product
+  service
+  freelance
+  milestone
+  business_to_business
+  vehicle
+  property
+  rental
+  digital_product
+  custom
+}
+
+enum DealStatus {
+  draft
+  invited
+  parties_accepted
+  created
+  awaiting_payment
+  payment_secured
+  seller_accepted
+  fulfillment_started
+  delivered
+  inspection_period
+  buyer_confirmed
+  release_pending
+  released
+  completed
+  cancelled
+  disputed
+  refunded
+  expired
+}
+
+enum DealParticipantRole {
+  buyer
+  seller
+  service_provider
+  business
+}
+
+enum DealInvitationStatus {
+  created
+  sent
+  accepted
+  declined
+  expired
+}
+
+enum AccountStatus {
+  active
+  suspended
+  locked
+}
+
+enum VerificationStatus {
+  unverified
+  pending
+  verified
+  rejected
+}
+
+enum BusinessType {
+  sole_proprietor
+  company
+  partnership
+  non_profit
+  other
+}
+
+enum BusinessMemberRole {
+  business_owner
+  business_admin
+  business_staff
+}
+
+enum NotificationChannel {
+  in_app
+  email
+  sms
+  whatsapp
+  push
+}
+
+enum NotificationStatus {
+  pending
+  delivered
+  read
+  failed
+}
+
+enum AIEmployeeStatus {
+  inactive
+  active
+  suspended
+}
+
+enum PaymentIntentStatus {
+  created
+  pending
+  authorized
+  confirmed
+  failed
+  cancelled
+  refunded
+}
+
+enum SettlementStatus {
+  created
+  processing
+  completed
+  failed
+}
+
+enum RefundStatus {
+  requested
+  approved
+  processing
+  completed
+  failed
+}
+
+enum LedgerAccountType {
+  asset
+  liability
+  revenue
+  expense
+}
+
+enum ReconciliationStatus {
+  matched
+  mismatched
+  pending_review
+}
+
+enum TrustVerificationStatus {
+  pending
+  submitted
+  under_review
+  verified
+  rejected
+  more_information_required
+  expired
+  suspended
+}
+
+enum ReviewStatus {
+  published
+  hidden
+  rejected
+}
+
+enum FraudCaseStatus {
+  open
+  investigating
+  under_review
+  more_information_required
+  resolved
+  cleared
+  action_required
+  dismissed
+  closed
+}
+
+enum RiskSeverity {
+  low
+  medium
+  high
+  critical
+  critical_review
+}
+
+enum ProductStatus {
+  draft
+  published
+  unavailable
+}
+
+enum OrderStatus {
+  created
+  payment_pending
+  payment_secured
+  fulfilled
+  completed
+  cancelled
+  disputed
+}
+
+model User {
+  id                 String             @id @default(uuid())
+  email              String             @unique
+  passwordHash       String
+  emailVerifiedAt    DateTime?
+  accountStatus      AccountStatus      @default(active)
+  verificationStatus VerificationStatus @default(unverified)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  profile            UserProfile?
+  memberships BusinessMember[]
+  buyerDeals  Deal[] @relation("buyerDeals")
+  sellerDeals Deal[] @relation("sellerDeals")
+  sessions    Session[]
+  notifications Notification[]
+  auditLogs   AuditLog[] @relation("auditActor")
+  dealEvents  DealEvent[] @relation("dealEventActor")
+  passwordResetTokens PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  settlementBeneficiary  Settlement[] @relation("settlementBeneficiary")
+  trustProfile           TrustProfile?
+  identityVerifications  IdentityVerification[]
+  reviewsWritten         Review[] @relation("reviewer")
+  reviewsReceived        Review[] @relation("reviewee")
+  fraudCases             FraudCase[] @relation("fraudSubjectUser")
+  riskSignals            RiskSignal[] @relation("riskSubjectUser")
+  staffRoles             StaffRoleAssignment[]
+  refundRequests         Refund[] @relation("refundRequester")
+  settlementsInitiated   Settlement[] @relation("settlementInitiator")
+  disputeEvidenceSubmitted DisputeEvidence[] @relation("disputeEvidenceSubmitter")
+  disputeDecisions       DisputeDecision[] @relation("disputeDecisionReviewer")
+  disputeResponses       DealDispute[] @relation("disputeResponseAuthor")
+  disputeResolutionProposals DealDispute[] @relation("disputeResolutionProposer")
+  disputeResolutionDecisions DealDispute[] @relation("disputeResolutionDecider")
+  products               Product[] @relation("productSeller")
+  buyerOrders            Order[] @relation("orderBuyer")
+  sellerOrders           Order[] @relation("orderSeller")
+  invitationsSent        DealInvitation[] @relation("dealInvitationInviter")
+  invitationsReceived    DealInvitation[] @relation("dealInvitationRecipient")
+}
+
+model UserProfile {
+  id       String @id @default(uuid())
+  userId   String @unique
+  name     String
+  phone    String?
+  imageUrl String?
+  country  String @db.Char(2)
+  language String @default("en")
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Business {
+  id                 String             @id @default(uuid())
+  name               String
+  type               BusinessType
+  verificationStatus VerificationStatus @default(unverified)
+  country            String             @db.Char(2)
+  currency           String             @db.Char(3)
+  description        String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  members            BusinessMember[]
+  deals              Deal[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  aiEmployees        AIEmployee[]
+  feeRules           FeeRule[]
+  ledgerAccounts     LedgerAccount[]
+  trustProfile       TrustProfile?
+  businessVerifications BusinessVerification[]
+  reviews            Review[]
+  fraudCases         FraudCase[] @relation("fraudSubjectBusiness")
+  riskSignals        RiskSignal[] @relation("riskSubjectBusiness")
+  products           Product[]
+}
+
+model BusinessMember {
+  id         String             @id @default(uuid())
+  businessId String
+  userId     String
+  role       BusinessMemberRole
+  createdAt  DateTime           @default(now())
+  business   Business           @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  user       User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([businessId, userId])
+  @@index([userId])
+}
+
+model Deal {
+  id                    String     @id @default(uuid())
+  reference             String     @unique
+  businessId            String?
+  buyerId               String
+  sellerId              String
+  type                  DealType
+  title                 String
+  description           String?
+  amount                Decimal    @db.Decimal(18, 2)
+  currency              String     @db.Char(3)
+  feeAmount             Decimal?   @db.Decimal(18, 2)
+  status                DealStatus @default(created)
+  inspectionPeriodHours Int?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  business              Business?  @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  buyer                 User       @relation("buyerDeals", fields: [buyerId], references: [id], onDelete: Restrict)
+  seller                User       @relation("sellerDeals", fields: [sellerId], references: [id], onDelete: Restrict)
+  events                DealEvent[]
+  paymentIntents        PaymentIntent[]
+  settlements           Settlement[]
+  journals              JournalEntry[]
+  reviews               Review[]
+  participants          DealParticipant[]
+  invitations           DealInvitation[]
+  terms                 DealTerms?
+  amendments            DealAmendment[]
+  delivery              DealDelivery?
+  disputes              DealDispute[]
+  order                 Order?
+
+  @@index([businessId, createdAt])
+  @@index([buyerId, createdAt])
+  @@index([sellerId, createdAt])
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Product {
+  id          String        @id @default(uuid())
+  sellerId    String
+  businessId  String?
+  categoryId  String?
+  title       String
+  description String
+  images      Json?
+  price       Decimal       @db.Decimal(18, 2)
+  currency    String        @db.Char(3)
+  location    String?
+  status      ProductStatus @default(draft)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  seller      User          @relation("productSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  business    Business?    @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  category    Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  orders      Order[]
+
+  @@index([status, categoryId, createdAt])
+  @@index([sellerId, status])
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  buyerId    String
+  sellerId   String
+  productId  String
+  dealId     String      @unique
+  amount     Decimal     @db.Decimal(18, 2)
+  currency   String      @db.Char(3)
+  status     OrderStatus @default(created)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  buyer      User        @relation("orderBuyer", fields: [buyerId], references: [id], onDelete: Restrict)
+  seller     User        @relation("orderSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+  deal       Deal        @relation(fields: [dealId], references: [id], onDelete: Restrict)
+
+  @@index([buyerId, status, createdAt])
+  @@index([sellerId, status, createdAt])
+}
+
+model DealParticipant {
+  id         String              @id @default(uuid())
+  dealId     String
+  userId     String?
+  businessId String?
+  role       DealParticipantRole
+  acceptedAt DateTime?
+  createdAt  DateTime            @default(now())
+  deal       Deal                @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@unique([dealId, userId, role])
+  @@index([userId, createdAt])
+  @@index([businessId, createdAt])
+}
+
+model DealInvitation {
+  id          String               @id @default(uuid())
+  dealId      String
+  inviterId   String
+  recipientUserId String?
+  email       String?
+  phone       String?
+  participantRole DealParticipantRole
+  tokenHash   String               @unique
+  status      DealInvitationStatus @default(created)
+  expiresAt   DateTime
+  viewedAt    DateTime?
+  acceptedAt  DateTime?
+  createdAt   DateTime             @default(now())
+  deal        Deal                 @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  inviter     User                 @relation("dealInvitationInviter", fields: [inviterId], references: [id], onDelete: Restrict)
+  recipient   User?                @relation("dealInvitationRecipient", fields: [recipientUserId], references: [id], onDelete: Restrict)
+
+  @@index([dealId, status])
+  @@index([recipientUserId, status])
+  @@index([email])
+  @@index([phone])
+  @@index([status, expiresAt])
+}
+
+model DealTerms {
+  id                   String   @id @default(uuid())
+  dealId               String   @unique
+  deliveryExpectations String?
+  completionRequirements String?
+  cancellationRules    String?
+  additionalNotes      String?
+  acceptedAt           DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  deal                 Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+}
+
+model DealAmendment {
+  id        String   @id @default(uuid())
+  dealId    String
+  actorId   String
+  changes   Json
+  status    String   @default("requested")
+  createdAt DateTime @default(now())
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId, createdAt])
+}
+
+model DealDelivery {
+  id                String   @id @default(uuid())
+  dealId            String   @unique
+  method            String
+  trackingReference String?
+  status            String   @default("pending")
+  notes             String?
+  deliveredAt       DateTime?
+  updatedAt         DateTime @updatedAt
+  deal              Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+}
+
+model DealDispute {
+  id                 String   @id @default(uuid())
+  dealId             String
+  openedById         String
+  reason             String
+  description        String
+  responseSummary    String?
+  responseById       String?
+  responseAt         DateTime?
+  resolutionProposal Json?
+  resolutionProposedById String?
+  resolutionProposedAt    DateTime?
+  resolutionDecision String?
+  resolutionDecisionById String?
+  resolutionDecisionAt    DateTime?
+  evidenceReferences Json?
+  status             String   @default("open")
+  createdAt          DateTime @default(now())
+  evidence           DisputeEvidence[]
+  decisions          DisputeDecision[]
+  deal               Deal     @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  responseBy         User?    @relation("disputeResponseAuthor", fields: [responseById], references: [id], onDelete: SetNull)
+  resolutionProposedBy User?  @relation("disputeResolutionProposer", fields: [resolutionProposedById], references: [id], onDelete: SetNull)
+  resolutionDecisionBy User?  @relation("disputeResolutionDecider", fields: [resolutionDecisionById], references: [id], onDelete: SetNull)
+
+  @@index([dealId, createdAt])
+}
+
+model DealEvent {
+  id        String   @id @default(uuid())
+  dealId    String
+  action    String
+  actorId   String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  deal       Deal     @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  actor      User?    @relation("dealEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([dealId, createdAt])
+}
+
+model IdempotencyKey {
+  id          String   @id @default(uuid())
+  scope       String
+  key         String
+  requestHash String
+  response    Json?
+  createdAt   DateTime @default(now())
+
+  @@unique([scope, key])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  businessId String?
+  action    String
+  resource  String
+  metadata  Json?
+  requestId String?
+  createdAt DateTime @default(now())
+  actor     User?    @relation("auditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  business  Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([resource, createdAt])
+  @@index([actorId, createdAt])
+  @@index([businessId, createdAt])
+}
+
+model Notification {
+  id         String             @id @default(uuid())
+  userId     String
+  businessId String?
+  channel    NotificationChannel @default(in_app)
+  status     NotificationStatus  @default(pending)
+  title      String
+  body       String
+  metadata   Json?
+  readAt     DateTime?
+  createdAt  DateTime           @default(now())
+  user       User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  business   Business?          @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status, createdAt])
+  @@index([businessId, createdAt])
+}
+
+model AIEmployee {
+  id            String           @id @default(uuid())
+  businessId    String?
+  name          String
+  role          String
+  description   String
+  permissions   Json
+  status        AIEmployeeStatus @default(inactive)
+  configuration Json?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  business      Business?        @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, status])
+}
+
+model PaymentIntent {
+  id                String              @id @default(uuid())
+  reference         String              @unique
+  dealId            String
+  amount            Decimal             @db.Decimal(18, 2)
+  currency          String              @db.Char(3)
+  providerCode      String
+  providerReference String?             @unique
+  status            PaymentIntentStatus @default(created)
+  idempotencyKey    String              @unique
+  metadata          Json?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deal              Deal                @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  events            FinancialEvent[]
+  refunds           Refund[]
+  journals          JournalEntry[]
+
+  @@index([dealId, createdAt])
+  @@index([status, createdAt])
+}
+
+model FinancialEvent {
+  id              String   @id @default(uuid())
+  reference       String   @unique
+  paymentIntentId String?
+  eventType       String
+  source          String
+  providerEventId String?
+  metadata        Json?
+  occurredAt      DateTime @default(now())
+  paymentIntent   PaymentIntent? @relation(fields: [paymentIntentId], references: [id], onDelete: Restrict)
+
+  @@unique([source, providerEventId])
+  @@index([paymentIntentId, occurredAt])
+  @@index([eventType, occurredAt])
+}
+
+model LedgerAccount {
+  id          String            @id @default(uuid())
+  businessId  String?
+  code        String            @unique
+  name        String
+  accountType LedgerAccountType
+  currency    String            @db.Char(3)
+  createdAt   DateTime          @default(now())
+  business    Business?         @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  lines       LedgerLine[]
+
+  @@index([businessId, currency])
+}
+
+model JournalEntry {
+  id              String   @id @default(uuid())
+  reference       String   @unique
+  dealId          String?
+  paymentIntentId String?
+  source          String
+  description     String
+  createdAt       DateTime @default(now())
+  deal            Deal?    @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  paymentIntent   PaymentIntent? @relation(fields: [paymentIntentId], references: [id], onDelete: Restrict)
+  lines           LedgerLine[]
+
+  @@index([dealId, createdAt])
+  @@index([paymentIntentId, createdAt])
+}
+
+model LedgerLine {
+  id             String       @id @default(uuid())
+  journalEntryId String
+  accountId      String
+  direction      String
+  amount         Decimal      @db.Decimal(18, 2)
+  currency       String       @db.Char(3)
+  createdAt      DateTime     @default(now())
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Restrict)
+  account        LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([journalEntryId])
+  @@index([accountId, createdAt])
+}
+
+model FeeRule {
+  id          String   @id @default(uuid())
+  businessId  String?
+  code        String   @unique
+  description String
+  percentage  Decimal? @db.Decimal(7, 4)
+  fixedAmount Decimal? @db.Decimal(18, 2)
+  currency    String?  @db.Char(3)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  business    Business? @relation(fields: [businessId], references: [id], onDelete: Restrict)
+}
+
+model Settlement {
+  id                String           @id @default(uuid())
+  reference         String           @unique
+  dealId            String
+  beneficiaryId     String
+  amount            Decimal          @db.Decimal(18, 2)
+  currency          String           @db.Char(3)
+  status            SettlementStatus @default(created)
+  idempotencyKey    String?          @unique
+  initiatedById     String?
+  providerCode      String?
+  providerReference String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deal              Deal             @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  beneficiary       User             @relation("settlementBeneficiary", fields: [beneficiaryId], references: [id], onDelete: Restrict)
+  initiatedBy       User?            @relation("settlementInitiator", fields: [initiatedById], references: [id], onDelete: SetNull)
+
+  @@index([dealId, status])
+  @@index([beneficiaryId, status])
+}
+
+model Refund {
+  id              String       @id @default(uuid())
+  reference       String       @unique
+  paymentIntentId String
+  amount          Decimal      @db.Decimal(18, 2)
+  currency        String       @db.Char(3)
+  status          RefundStatus @default(requested)
+  idempotencyKey  String?      @unique
+  requestedById   String?
+  reason          String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  paymentIntent   PaymentIntent @relation(fields: [paymentIntentId], references: [id], onDelete: Restrict)
+  requestedBy     User?         @relation("refundRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+
+  @@index([paymentIntentId, status])
+}
+
+model DisputeEvidence {
+  id          String      @id @default(uuid())
+  disputeId   String
+  submittedById String
+  kind        String
+  reference   String
+  description String?
+  createdAt   DateTime    @default(now())
+  dispute     DealDispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  submittedBy User        @relation("disputeEvidenceSubmitter", fields: [submittedById], references: [id], onDelete: Restrict)
+
+  @@index([disputeId, createdAt])
+}
+
+model DisputeDecision {
+  id          String      @id @default(uuid())
+  disputeId   String
+  reviewerId  String
+  outcome     String
+  reason      String
+  createdAt   DateTime    @default(now())
+  dispute     DealDispute @relation(fields: [disputeId], references: [id], onDelete: Restrict)
+  reviewer    User        @relation("disputeDecisionReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+
+  @@index([disputeId, createdAt])
+}
+
+model ExternalTransaction {
+  id                String   @id @default(uuid())
+  providerCode      String
+  providerReference String
+  amount            Decimal  @db.Decimal(18, 2)
+  currency          String   @db.Char(3)
+  occurredAt        DateTime
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  reconciliation    ReconciliationResult?
+
+  @@unique([providerCode, providerReference])
+}
+
+model ReconciliationResult {
+  id                    String               @id @default(uuid())
+  externalTransactionId String              @unique
+  journalEntryId        String?
+  status                ReconciliationStatus @default(pending_review)
+  reason                String?
+  createdAt             DateTime             @default(now())
+  reviewedAt            DateTime?
+  externalTransaction   ExternalTransaction  @relation(fields: [externalTransactionId], references: [id], onDelete: Restrict)
+}
+
+model WebhookEvent {
+  id                String   @id @default(uuid())
+  providerCode      String
+  providerEventId   String
+  signatureVerified Boolean
+  payload           Json
+  processedAt       DateTime?
+  createdAt         DateTime @default(now())
+
+  @@unique([providerCode, providerEventId])
+}
+
+model VerificationLevel {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  rank        Int      @unique
+  rules       Json
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model IdentityVerification {
+  id                String                  @id @default(uuid())
+  userId            String
+  fullName          String
+  dateOfBirth       DateTime?
+  phone             String?
+  identityType      String
+  identityReference String
+  country           String                  @db.Char(2)
+  status            TrustVerificationStatus @default(pending)
+  providerCode      String?
+  documentMetadata  Json?
+  submittedAt       DateTime?
+  reviewedAt        DateTime?
+  reviewerId        String?
+  assignedReviewerId String?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  user              User                    @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model BusinessVerification {
+  id                 String                  @id @default(uuid())
+  businessId         String
+  registeredName     String?
+  registrationNumber String?
+  ownerInformation   Json?
+  documentMetadata   Json?
+  status             TrustVerificationStatus @default(pending)
+  submittedAt        DateTime?
+  reviewedAt         DateTime?
+  reviewerId         String?
+  assignedReviewerId String?
+  decisionReason     String?
+  history            BusinessVerificationHistory[]
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  business           Business                @relation(fields: [businessId], references: [id], onDelete: Restrict)
+
+  @@index([businessId, status])
+  @@index([status, createdAt])
+}
+
+model BusinessVerificationHistory {
+  id                     String                  @id @default(uuid())
+  businessVerificationId String
+  actorId                String
+  status                 TrustVerificationStatus
+  reason                 String?
+  createdAt              DateTime                @default(now())
+  verification           BusinessVerification    @relation(fields: [businessVerificationId], references: [id], onDelete: Cascade)
+
+  @@index([businessVerificationId, createdAt])
+}
+
+model TrustProfile {
+  id                 String   @id @default(uuid())
+  userId             String?  @unique
+  businessId         String?  @unique
+  verificationLevel  String   @default("level_0")
+  score              Int      @default(0)
+  completedDeals     Int      @default(0)
+  successfulDeals    Int      @default(0)
+  cancelledDeals     Int      @default(0)
+  isPublic           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  averageRating      Decimal? @db.Decimal(3, 2)
+  user               User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business           Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  scoreHistory       TrustScoreHistory[]
+
+  @@index([verificationLevel, score])
+}
+
+model TrustScoreHistory {
+  id             String       @id @default(uuid())
+  trustProfileId String
+  score          Int
+  factors        Json
+  calculatedAt   DateTime     @default(now())
+  trustProfile   TrustProfile @relation(fields: [trustProfileId], references: [id], onDelete: Restrict)
+
+  @@index([trustProfileId, calculatedAt])
+}
+
+model Review {
+  id         String       @id @default(uuid())
+  dealId     String
+  reviewerId String
+  revieweeId String
+  businessId String?
+  rating     Int
+  comment    String?
+  status     ReviewStatus @default(published)
+  createdAt  DateTime     @default(now())
+  deal       Deal         @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  reviewer   User         @relation("reviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+  reviewee   User         @relation("reviewee", fields: [revieweeId], references: [id], onDelete: Restrict)
+  business   Business?    @relation(fields: [businessId], references: [id], onDelete: Restrict)
+
+  @@unique([dealId, reviewerId])
+  @@index([revieweeId, createdAt])
+}
+
+model FraudCase {
+  id                String          @id @default(uuid())
+  userId            String?
+  businessId        String?
+  riskLevel         RiskSeverity
+  reason            String
+  evidence          Json?
+  status            FraudCaseStatus @default(open)
+  assignedReviewerId String?
+  investigationNotes String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  user              User?           @relation("fraudSubjectUser", fields: [userId], references: [id], onDelete: Restrict)
+  business          Business?       @relation("fraudSubjectBusiness", fields: [businessId], references: [id], onDelete: Restrict)
+
+  @@index([status, riskLevel])
+}
+
+model RiskSignal {
+  id          String       @id @default(uuid())
+  userId      String?
+  businessId  String?
+  signalType  String
+  severity    RiskSeverity
+  explanation String
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+  user        User?        @relation("riskSubjectUser", fields: [userId], references: [id], onDelete: Restrict)
+  business    Business?    @relation("riskSubjectBusiness", fields: [businessId], references: [id], onDelete: Restrict)
+
+  @@index([userId, severity])
+  @@index([businessId, severity])
+}
+
+model VerificationDocument {
+  id                 String   @id @default(uuid())
+  ownerUserId        String?
+  ownerBusinessId    String?
+  identityVerificationId String?
+  businessVerificationId String?
+  documentType       String
+  storageReference   String
+  status             TrustVerificationStatus @default(submitted)
+  uploadedAt         DateTime @default(now())
+  reviewedAt         DateTime?
+  expiresAt          DateTime?
+  accessLogs         VerificationDocumentAccessLog[]
+
+  @@index([identityVerificationId])
+  @@index([businessVerificationId])
+}
+
+model VerificationDocumentAccessLog {
+  id           String               @id @default(uuid())
+  documentId   String
+  actorId      String
+  action       String
+  createdAt    DateTime             @default(now())
+  document     VerificationDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, createdAt])
+  @@index([actorId, createdAt])
+}
+
+model StaffRoleAssignment {
+  id        String   @id @default(uuid())
+  userId    String
+  role      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+}

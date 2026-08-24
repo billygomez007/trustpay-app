@@ -1,0 +1,1 @@
+ALTER TABLE "TrustProfile" ADD COLUMN "averageRating" DECIMAL(3,2);

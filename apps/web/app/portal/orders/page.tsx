@@ -1,0 +1,8 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { apiRequest } from '../../components/api';
+
+type Order = { id: string; dealId: string; amount: string; currency: string; status: string; product: { title: string } };
+export default function OrdersPage() { const [orders, setOrders] = useState<Order[]>([]); useEffect(() => { void apiRequest<Order[]>('/orders').then(setOrders).catch(() => setOrders([])); }, []); return <main className="customer-page"><header className="customer-header"><Link href="/portal">← TrustPay</Link><span>Buyer dashboard</span><Link className="header-action" href="/marketplace">Explore marketplace</Link></header><section className="customer-intro"><span className="market-eyebrow">ESCROW ORDERS</span><h1>My orders</h1><p>Follow every purchase from order creation to protected completion.</p></section><section className="purchase-list">{orders.map((order) => <Link className="purchase-row" href={`/portal/deals/${order.dealId}`} key={order.id}><div className="purchase-symbol">✓</div><div className="purchase-main"><strong>{order.product.title}</strong><span>Order {order.id.slice(0, 8)}…</span></div><div className="purchase-amount"><strong>{order.amount} {order.currency}</strong><span className={`customer-status ${order.status}`}>{order.status.replaceAll('_', ' ')}</span></div><span className="row-arrow">→</span></Link>)}{!orders.length && <div className="customer-empty"><strong>No orders yet</strong><span>Choose a seller and create your first protected order.</span><Link href="/marketplace">Browse the marketplace →</Link></div>}</section></main>; }
