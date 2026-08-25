@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { evaluateRiskSignal, normalizeRiskSeverity } from '../src/domains/trust/risk-evaluation.service.js';
+import {
+  evaluateRiskSignal,
+  normalizeRiskSeverity
+} from '../src/domains/trust/risk-evaluation.service.js';
 import { summarizeRiskCase, trustAiBoundaries } from '../src/domains/trust/trust-ai-assistants.js';
 
 test('risk evaluation creates advisory high severity recommendations without enforcement', () => {
@@ -42,7 +45,13 @@ test('AI summaries remain advisory and cannot execute financial actions', () => 
   const summary = summarizeRiskCase({
     caseRef: 'RISK-1001',
     reason: 'Multiple failed provider confirmations in 30 days.',
-    signals: [{ severity: 'high', signalType: 'payment_mismatch', explanation: 'Provider amount mismatch detected.' }],
+    signals: [
+      {
+        severity: 'high',
+        signalType: 'payment_mismatch',
+        explanation: 'Provider amount mismatch detected.'
+      }
+    ],
     transactionSummary: 'One protected deal exceeded expected amount variance.'
   });
 

@@ -25,7 +25,9 @@ export default function DisputesPage() {
 
   const metrics = useMemo(
     () => ({
-      open: cases.filter((item) => ['open', 'under_review', 'resolution_proposed'].includes(item.status)).length,
+      open: cases.filter((item) =>
+        ['open', 'under_review', 'resolution_proposed'].includes(item.status)
+      ).length,
       resolved: cases.filter((item) => ['resolved', 'decided'].includes(item.status)).length,
       waiting: cases.filter((item) => item.status === 'resolution_proposed').length
     }),

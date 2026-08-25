@@ -23,13 +23,17 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState('');
   const [resolutionNotes, setResolutionNotes] = useState('');
-  const [resolutionOutcome, setResolutionOutcome] = useState<'release' | 'refund' | 'partial_refund' | 'partial_release' | 'amend_terms'>('refund');
+  const [resolutionOutcome, setResolutionOutcome] = useState<
+    'release' | 'refund' | 'partial_refund' | 'partial_release' | 'amend_terms'
+  >('refund');
   const [evidenceKind, setEvidenceKind] = useState('document');
   const [evidenceReference, setEvidenceReference] = useState('');
   const [evidenceDescription, setEvidenceDescription] = useState('');
 
   useEffect(() => {
-    void getCurrentUser().then(setCurrentUser).catch(() => setCurrentUser(null));
+    void getCurrentUser()
+      .then(setCurrentUser)
+      .catch(() => setCurrentUser(null));
   }, []);
 
   useEffect(() => {
@@ -59,15 +63,20 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
 
   const canRespond = Boolean(
     currentUser?.id &&
-      role &&
-      currentUser.id !== dispute.responseById &&
-      currentUser.id !== dispute.openedById
+    role &&
+    currentUser.id !== dispute.responseById &&
+    currentUser.id !== dispute.openedById
   );
   const canReviewProposal = Boolean(
-    currentUser?.id && dispute.resolutionProposal && currentUser.id !== dispute.resolutionProposal.proposedById
+    currentUser?.id &&
+    dispute.resolutionProposal &&
+    currentUser.id !== dispute.resolutionProposal.proposedById
   );
   const canPropose = Boolean(
-    currentUser?.id && role && dispute.status !== 'resolved' && currentUser.id !== dispute.resolutionDecisionById
+    currentUser?.id &&
+    role &&
+    dispute.status !== 'resolved' &&
+    currentUser.id !== dispute.resolutionDecisionById
   );
 
   const submitResponse = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -85,7 +94,10 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
   const submitProposal = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      await proposeDisputeResolution(dispute.id, { outcome: resolutionOutcome, notes: resolutionNotes });
+      await proposeDisputeResolution(dispute.id, {
+        outcome: resolutionOutcome,
+        notes: resolutionNotes
+      });
       setDispute(await getDispute(dispute.id));
       setMessage('Resolution proposal submitted.');
       setResolutionNotes('');
@@ -96,7 +108,10 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
 
   const submitDecision = async (decision: 'accepted' | 'rejected') => {
     try {
-      await reviewDisputeResolution(dispute.id, { decision, reason: decision === 'accepted' ? 'Accepted by counterparty' : 'Rejected by counterparty' });
+      await reviewDisputeResolution(dispute.id, {
+        decision,
+        reason: decision === 'accepted' ? 'Accepted by counterparty' : 'Rejected by counterparty'
+      });
       setDispute(await getDispute(dispute.id));
       setMessage(decision === 'accepted' ? 'Resolution accepted.' : 'Resolution rejected.');
     } catch {
@@ -182,7 +197,8 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
               <div className="agreement-copy">
                 <p>{dispute.responseSummary}</p>
                 <p>
-                  <strong>Submitted:</strong> {dispute.responseAt ? new Date(dispute.responseAt).toLocaleString('en-GH') : '—'}
+                  <strong>Submitted:</strong>{' '}
+                  {dispute.responseAt ? new Date(dispute.responseAt).toLocaleString('en-GH') : '—'}
                 </p>
               </div>
             ) : (
@@ -195,7 +211,12 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
               <form className="detail-form" onSubmit={submitResponse}>
                 <label>
                   Response
-                  <textarea value={response} onChange={(event) => setResponse(event.target.value)} rows={4} required />
+                  <textarea
+                    value={response}
+                    onChange={(event) => setResponse(event.target.value)}
+                    rows={4}
+                    required
+                  />
                 </label>
                 <button type="submit">Submit response</button>
               </form>
@@ -229,7 +250,12 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
               <form className="detail-form" onSubmit={submitProposal}>
                 <label>
                   Outcome
-                  <select value={resolutionOutcome} onChange={(event) => setResolutionOutcome(event.target.value as typeof resolutionOutcome)}>
+                  <select
+                    value={resolutionOutcome}
+                    onChange={(event) =>
+                      setResolutionOutcome(event.target.value as typeof resolutionOutcome)
+                    }
+                  >
                     <option value="refund">Refund</option>
                     <option value="release">Release funds</option>
                     <option value="partial_refund">Partial refund</option>
@@ -239,7 +265,12 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
                 </label>
                 <label>
                   Notes
-                  <textarea value={resolutionNotes} onChange={(event) => setResolutionNotes(event.target.value)} rows={4} required />
+                  <textarea
+                    value={resolutionNotes}
+                    onChange={(event) => setResolutionNotes(event.target.value)}
+                    rows={4}
+                    required
+                  />
                 </label>
                 <button type="submit">Propose resolution</button>
               </form>
@@ -265,15 +296,26 @@ export default function DisputeDetailPage({ params }: { params: Promise<{ id: st
             <form className="detail-form" onSubmit={submitEvidence}>
               <label>
                 Evidence type
-                <input value={evidenceKind} onChange={(event) => setEvidenceKind(event.target.value)} />
+                <input
+                  value={evidenceKind}
+                  onChange={(event) => setEvidenceKind(event.target.value)}
+                />
               </label>
               <label>
                 Reference
-                <input value={evidenceReference} onChange={(event) => setEvidenceReference(event.target.value)} required />
+                <input
+                  value={evidenceReference}
+                  onChange={(event) => setEvidenceReference(event.target.value)}
+                  required
+                />
               </label>
               <label>
                 Notes
-                <textarea value={evidenceDescription} onChange={(event) => setEvidenceDescription(event.target.value)} rows={4} />
+                <textarea
+                  value={evidenceDescription}
+                  onChange={(event) => setEvidenceDescription(event.target.value)}
+                  rows={4}
+                />
               </label>
               <button type="submit">Add evidence</button>
             </form>

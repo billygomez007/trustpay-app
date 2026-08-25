@@ -45,7 +45,10 @@ export class TrustOperationsService {
       resource: `identity-verification:${id}`,
       metadata: { reason }
     });
-    await this.trust.refreshProfileForUser(verification.userId, status === 'verified' ? 'level_1' : 'level_0');
+    await this.trust.refreshProfileForUser(
+      verification.userId,
+      status === 'verified' ? 'level_1' : 'level_0'
+    );
     return updated;
   }
 
@@ -239,7 +242,17 @@ export class TrustOperationsService {
     userId: string,
     id: string,
     input: {
-      status?: 'open' | 'investigating' | 'under_review' | 'more_information_required' | 'resolved' | 'cleared' | 'action_required' | 'dismissed' | 'closed' | undefined;
+      status?:
+        | 'open'
+        | 'investigating'
+        | 'under_review'
+        | 'more_information_required'
+        | 'resolved'
+        | 'cleared'
+        | 'action_required'
+        | 'dismissed'
+        | 'closed'
+        | undefined;
       assignedReviewerId?: string | null | undefined;
       investigationNotes?: string | undefined;
       evidence?: Record<string, unknown> | undefined;

@@ -17,15 +17,22 @@ export class MockPaymentProvider implements PaymentProvider {
     };
   }
 
-  public async verifyWebhook(input: { signature: string | undefined; payload: unknown }): Promise<boolean> {
+  public async verifyWebhook(input: {
+    signature: string | undefined;
+    payload: unknown;
+  }): Promise<boolean> {
     return input.signature === process.env.PAYMENT_PROVIDER_WEBHOOK_SECRET;
   }
 
   public async normalizeWebhookEvent(payload: unknown): Promise<ProviderWebhookResult> {
-    const entry = typeof payload === 'object' && payload ? (payload as Record<string, unknown>) : {};
+    const entry =
+      typeof payload === 'object' && payload ? (payload as Record<string, unknown>) : {};
     const providerEventId = String(entry.providerEventId ?? entry.id ?? 'mock-webhook');
     const providerReference = String(entry.providerReference ?? entry.reference ?? 'MOCK_REF');
-    const eventType = String(entry.eventType ?? 'payment.confirmed') === 'payment.failed' ? 'payment.failed' : 'payment.confirmed';
+    const eventType =
+      String(entry.eventType ?? 'payment.confirmed') === 'payment.failed'
+        ? 'payment.failed'
+        : 'payment.confirmed';
     return {
       providerEventId,
       providerReference,
@@ -36,7 +43,15 @@ export class MockPaymentProvider implements PaymentProvider {
     };
   }
 
-  public async verifyTransaction(input: { reference: string }): Promise<{ success: boolean; status: string; amount: string; currency: string; providerReference: string }> {
+  public async verifyTransaction(input: {
+    reference: string;
+  }): Promise<{
+    success: boolean;
+    status: string;
+    amount: string;
+    currency: string;
+    providerReference: string;
+  }> {
     return {
       success: true,
       status: 'success',
@@ -46,7 +61,9 @@ export class MockPaymentProvider implements PaymentProvider {
     };
   }
 
-  public async getTransactionStatus(input: { reference: string }): Promise<{ status: string; amount: string; currency: string; success: boolean }> {
+  public async getTransactionStatus(input: {
+    reference: string;
+  }): Promise<{ status: string; amount: string; currency: string; success: boolean }> {
     void input.reference;
     return {
       status: 'success',
@@ -56,7 +73,12 @@ export class MockPaymentProvider implements PaymentProvider {
     };
   }
 
-  public async refundPayment(input: { reference: string; amount: string; currency: string; reason?: string }): Promise<{ providerReference: string; status: 'pending' | 'completed' | 'failed' }> {
+  public async refundPayment(input: {
+    reference: string;
+    amount: string;
+    currency: string;
+    reason?: string;
+  }): Promise<{ providerReference: string; status: 'pending' | 'completed' | 'failed' }> {
     return {
       providerReference: input.reference,
       status: 'pending'

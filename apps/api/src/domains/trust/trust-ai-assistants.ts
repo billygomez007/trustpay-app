@@ -23,9 +23,13 @@ export function summarizeRiskCase(input: RiskAiSummaryInput): AdvisoryOutput {
   ];
 
   if (signals.length) {
-    const highPriority = signals.filter((signal) => (signal.severity ?? '').toLowerCase().includes('high')).length;
+    const highPriority = signals.filter((signal) =>
+      (signal.severity ?? '').toLowerCase().includes('high')
+    ).length;
     if (highPriority > 0) {
-      recommendations.unshift('Prioritize the case for manual review because multiple high-risk signals were observed.');
+      recommendations.unshift(
+        'Prioritize the case for manual review because multiple high-risk signals were observed.'
+      );
     }
   }
 
@@ -33,7 +37,9 @@ export function summarizeRiskCase(input: RiskAiSummaryInput): AdvisoryOutput {
     summary: [
       input.caseRef ? `Case ${input.caseRef}:` : 'Risk review case:',
       summary,
-      input.transactionSummary ? `Transaction context: ${input.transactionSummary}` : 'Transaction context: review the related protected transaction record.'
+      input.transactionSummary
+        ? `Transaction context: ${input.transactionSummary}`
+        : 'Transaction context: review the related protected transaction record.'
     ].join(' '),
     recommendations,
     advisory: true

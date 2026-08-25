@@ -31,13 +31,29 @@ export class DisputesController {
   }
 
   @Post(':disputeId/evidence')
-  public evidence(@Req() request: AuthenticatedRequest, @Param('disputeId') disputeId: string, @Body() body: unknown) {
-    return this.disputes.submitEvidence(request.user!.id, disputeId, parseRequest(submitDisputeEvidenceSchema, body));
+  public evidence(
+    @Req() request: AuthenticatedRequest,
+    @Param('disputeId') disputeId: string,
+    @Body() body: unknown
+  ) {
+    return this.disputes.submitEvidence(
+      request.user!.id,
+      disputeId,
+      parseRequest(submitDisputeEvidenceSchema, body)
+    );
   }
 
   @Post(':disputeId/response')
-  public response(@Req() request: AuthenticatedRequest, @Param('disputeId') disputeId: string, @Body() body: unknown) {
-    return this.disputes.respond(request.user!.id, disputeId, parseRequest(submitDisputeResponseSchema, body));
+  public response(
+    @Req() request: AuthenticatedRequest,
+    @Param('disputeId') disputeId: string,
+    @Body() body: unknown
+  ) {
+    return this.disputes.respond(
+      request.user!.id,
+      disputeId,
+      parseRequest(submitDisputeResponseSchema, body)
+    );
   }
 
   @Post(':disputeId/resolution')
@@ -67,7 +83,15 @@ export class DisputesController {
   }
 
   @Post(':disputeId/decision')
-  public decision(@Req() request: AuthenticatedRequest, @Param('disputeId') disputeId: string, @Body() body: unknown) {
-    return this.disputes.decide(request.user!.id, disputeId, parseRequest(disputeDecisionSchema, body));
+  public decision(
+    @Req() request: AuthenticatedRequest,
+    @Param('disputeId') disputeId: string,
+    @Body() body: unknown
+  ) {
+    return this.disputes.decide(
+      request.user!.id,
+      disputeId,
+      parseRequest(disputeDecisionSchema, body)
+    );
   }
 }

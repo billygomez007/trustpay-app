@@ -178,13 +178,13 @@ export const createDealAmendmentSchema = z
     (value) =>
       Boolean(
         value.title ||
-          value.description ||
-          value.amount ||
-          value.inspectionPeriodHours !== undefined ||
-          value.deliveryExpectations ||
-          value.completionRequirements ||
-          value.cancellationRules ||
-          value.additionalNotes
+        value.description ||
+        value.amount ||
+        value.inspectionPeriodHours !== undefined ||
+        value.deliveryExpectations ||
+        value.completionRequirements ||
+        value.cancellationRules ||
+        value.additionalNotes
       ),
     'At least one proposed agreement change is required.'
   );
@@ -206,9 +206,12 @@ export const createProductSchema = z.object({
   status: z.enum(['draft', 'published', 'unavailable']).optional()
 });
 
-export const updateProductSchema = createProductSchema.omit({ status: true }).partial().extend({
-  status: z.enum(['draft', 'published', 'unavailable']).optional()
-});
+export const updateProductSchema = createProductSchema
+  .omit({ status: true })
+  .partial()
+  .extend({
+    status: z.enum(['draft', 'published', 'unavailable']).optional()
+  });
 
 export const createOrderSchema = z.object({
   productId: z.string().uuid(),

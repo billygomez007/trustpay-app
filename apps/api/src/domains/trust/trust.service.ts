@@ -31,35 +31,44 @@ export class TrustService {
         ...(verificationLevelOverride ? {} : {})
       }
     });
-    const [completedDeals, cancelledDeals, disputeCount, riskSignalCount, averageRating] = await Promise.all([
-      prisma.deal.count({
-        where: {
-          OR: [{ buyerId: userId, status: 'completed' }, { sellerId: userId, status: 'completed' }]
-        }
-      }),
-      prisma.deal.count({
-        where: {
-          OR: [{ buyerId: userId, status: 'cancelled' }, { sellerId: userId, status: 'cancelled' }]
-        }
-      }),
-      prisma.dealDispute.count({
-        where: {
-          deal: { OR: [{ buyerId: userId }, { sellerId: userId }] }
-        }
-      }),
-      prisma.riskSignal.count({ where: { userId } }),
-      prisma.review.aggregate({
-        where: { revieweeId: userId, status: 'published' },
-        _avg: { rating: true }
-      })
-    ]);
+    const [completedDeals, cancelledDeals, disputeCount, riskSignalCount, averageRating] =
+      await Promise.all([
+        prisma.deal.count({
+          where: {
+            OR: [
+              { buyerId: userId, status: 'completed' },
+              { sellerId: userId, status: 'completed' }
+            ]
+          }
+        }),
+        prisma.deal.count({
+          where: {
+            OR: [
+              { buyerId: userId, status: 'cancelled' },
+              { sellerId: userId, status: 'cancelled' }
+            ]
+          }
+        }),
+        prisma.dealDispute.count({
+          where: {
+            deal: { OR: [{ buyerId: userId }, { sellerId: userId }] }
+          }
+        }),
+        prisma.riskSignal.count({ where: { userId } }),
+        prisma.review.aggregate({
+          where: { revieweeId: userId, status: 'published' },
+          _avg: { rating: true }
+        })
+      ]);
     const scoreInput = {
       completedDeals,
       cancelledDeals,
       disputes: disputeCount,
       verificationRank: this.verificationRank(verificationLevel),
       riskSignals: riskSignalCount,
-      ...(averageRating._avg.rating == null ? {} : { averageRating: Number(averageRating._avg.rating) })
+      ...(averageRating._avg.rating == null
+        ? {}
+        : { averageRating: Number(averageRating._avg.rating) })
     };
     const result = this.trustScore.calculate(scoreInput);
     const ratingValue = averageRating._avg.rating ? Number(averageRating._avg.rating) : null;
@@ -106,37 +115,40 @@ export class TrustService {
         verificationLevel
       }
     });
-    const [completedDeals, cancelledDeals, disputeCount, riskSignalCount, averageRating] = await Promise.all([
-      prisma.deal.count({
-        where: {
-          businessId,
-          status: 'completed'
-        }
-      }),
-      prisma.deal.count({
-        where: {
-          businessId,
-          status: 'cancelled'
-        }
-      }),
-      prisma.dealDispute.count({
-        where: {
-          deal: { businessId }
-        }
-      }),
-      prisma.riskSignal.count({ where: { businessId } }),
-      prisma.review.aggregate({
-        where: { businessId, status: 'published' },
-        _avg: { rating: true }
-      })
-    ]);
+    const [completedDeals, cancelledDeals, disputeCount, riskSignalCount, averageRating] =
+      await Promise.all([
+        prisma.deal.count({
+          where: {
+            businessId,
+            status: 'completed'
+          }
+        }),
+        prisma.deal.count({
+          where: {
+            businessId,
+            status: 'cancelled'
+          }
+        }),
+        prisma.dealDispute.count({
+          where: {
+            deal: { businessId }
+          }
+        }),
+        prisma.riskSignal.count({ where: { businessId } }),
+        prisma.review.aggregate({
+          where: { businessId, status: 'published' },
+          _avg: { rating: true }
+        })
+      ]);
     const scoreInput = {
       completedDeals,
       cancelledDeals,
       disputes: disputeCount,
       verificationRank: this.verificationRank(verificationLevel),
       riskSignals: riskSignalCount,
-      ...(averageRating._avg.rating == null ? {} : { averageRating: Number(averageRating._avg.rating) })
+      ...(averageRating._avg.rating == null
+        ? {}
+        : { averageRating: Number(averageRating._avg.rating) })
     };
     const result = this.trustScore.calculate(scoreInput);
     const ratingValue = averageRating._avg.rating ? Number(averageRating._avg.rating) : null;

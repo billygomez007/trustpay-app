@@ -126,7 +126,10 @@ export class DealsService {
         amendments: { orderBy: { createdAt: 'desc' } },
         disputes: {
           orderBy: { createdAt: 'desc' },
-          include: { evidence: { orderBy: { createdAt: 'asc' } }, decisions: { orderBy: { createdAt: 'asc' } } }
+          include: {
+            evidence: { orderBy: { createdAt: 'asc' } },
+            decisions: { orderBy: { createdAt: 'asc' } }
+          }
         },
         delivery: true,
         participants: {
@@ -149,7 +152,11 @@ export class DealsService {
   public async proposeAmendment(actorId: string, dealId: string, input: CreateDealAmendmentInput) {
     const deal = await prisma.deal.findUnique({
       where: { id: dealId },
-      include: { terms: true, buyer: { include: { profile: true } }, seller: { include: { profile: true } } }
+      include: {
+        terms: true,
+        buyer: { include: { profile: true } },
+        seller: { include: { profile: true } }
+      }
     });
     if (!deal || (deal.buyerId !== actorId && deal.sellerId !== actorId)) {
       throw new NotFoundException('Deal not found.');
@@ -189,8 +196,12 @@ export class DealsService {
               ...(input.completionRequirements !== undefined
                 ? { completionRequirements: input.completionRequirements }
                 : {}),
-              ...(input.cancellationRules !== undefined ? { cancellationRules: input.cancellationRules } : {}),
-              ...(input.additionalNotes !== undefined ? { additionalNotes: input.additionalNotes } : {})
+              ...(input.cancellationRules !== undefined
+                ? { cancellationRules: input.cancellationRules }
+                : {}),
+              ...(input.additionalNotes !== undefined
+                ? { additionalNotes: input.additionalNotes }
+                : {})
             }
           } as Prisma.InputJsonValue
         }
@@ -322,7 +333,12 @@ export class DealsService {
           input.decision === 'accepted'
             ? 'The protected transaction agreement was updated.'
             : 'The protected transaction agreement remains unchanged.',
-        metadata: { dealId, amendmentId: updated.id, decision: input.decision, reason: input.reason }
+        metadata: {
+          dealId,
+          amendmentId: updated.id,
+          decision: input.decision,
+          reason: input.reason
+        }
       }),
       this.auditService.record({
         actorId,

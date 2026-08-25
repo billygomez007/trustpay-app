@@ -4,6 +4,7 @@ dist
 .next
 .expo
 coverage
+*.tsbuildinfo
 *.log
 .env
 .env.local

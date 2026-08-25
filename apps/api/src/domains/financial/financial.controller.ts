@@ -56,12 +56,22 @@ export class FinancialController {
   }
 
   @Post('settlements')
-  public createSettlement(@Req() request: AuthenticatedRequest, @Body() body: { dealId: string; idempotencyKey: string }) {
-    return this.settlements.createForCompletedDeal(request.user!.id, body.dealId, body.idempotencyKey);
+  public createSettlement(
+    @Req() request: AuthenticatedRequest,
+    @Body() body: { dealId: string; idempotencyKey: string }
+  ) {
+    return this.settlements.createForCompletedDeal(
+      request.user!.id,
+      body.dealId,
+      body.idempotencyKey
+    );
   }
 
   @Post('settlements/:settlementId/complete')
-  public completeSettlement(@Req() request: AuthenticatedRequest, @Param('settlementId') settlementId: string) {
+  public completeSettlement(
+    @Req() request: AuthenticatedRequest,
+    @Param('settlementId') settlementId: string
+  ) {
     return this.settlements.complete(request.user!.id, settlementId);
   }
 }

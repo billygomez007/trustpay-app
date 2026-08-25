@@ -4,12 +4,22 @@ const useCases = [
   {
     title: 'Commerce',
     copy: 'Buy and sell with confidence.',
-    examples: ['Online purchases', 'Marketplace transactions', 'Wholesale deals', 'High-value purchases']
+    examples: [
+      'Online purchases',
+      'Marketplace transactions',
+      'Wholesale deals',
+      'High-value purchases'
+    ]
   },
   {
     title: 'Property',
     copy: 'Protect deposits and property agreements.',
-    examples: ['Rental caution deposits', 'Advance payments', 'Tenant-landlord agreements', 'Property-related transactions']
+    examples: [
+      'Rental caution deposits',
+      'Advance payments',
+      'Tenant-landlord agreements',
+      'Property-related transactions'
+    ]
   },
   {
     title: 'Services',
@@ -47,7 +57,7 @@ const steps = [
   {
     number: '04',
     title: 'Release funds with confidence',
-    copy: 'Funds are released according to the agreed transaction conditions and TrustPay\'s protected process.'
+    copy: "Funds are released according to the agreed transaction conditions and TrustPay's protected process."
   }
 ];
 
@@ -64,14 +74,18 @@ export default function HomePage() {
   return (
     <main className="home-page">
       <header className="market-header home-header">
-        <Link className="market-brand" href="/"><span>T</span> TrustPay</Link>
+        <Link className="market-brand" href="/">
+          <span>T</span> TrustPay
+        </Link>
         <nav aria-label="Primary">
           <Link href="#how-it-works">How it works</Link>
           <Link href="#use-cases">Use cases</Link>
           <Link href="/marketplace">Marketplace</Link>
           <Link href="#businesses">For businesses</Link>
           <Link href="#trust-security">Trust & security</Link>
-          <Link className="market-signin" href="/sign-in">Sign in</Link>
+          <Link className="market-signin" href="/pre-launch">
+            Sign in
+          </Link>
         </nav>
       </header>
 
@@ -84,7 +98,7 @@ export default function HomePage() {
             or entering an agreement, TrustPay helps both parties transact with confidence.
           </p>
           <div className="home-actions">
-            <Link className="hero-primary" href="/portal/deals/create">
+            <Link className="hero-primary" href="/pre-launch">
               Start a Protected Transaction <span>→</span>
             </Link>
             <Link className="hero-secondary" href="#how-it-works">
@@ -149,8 +163,8 @@ export default function HomePage() {
           <span className="market-eyebrow">Marketplace</span>
           <h2>Shop through the TrustPay Marketplace.</h2>
           <p>
-            Discover products and public Trust Profiles while using TrustPay protection.
-            The Marketplace is one way people and businesses can use the platform.
+            Discover products and public Trust Profiles while using TrustPay protection. The
+            Marketplace is one way people and businesses can use the platform.
           </p>
         </div>
         <Link className="trust-cta home-inline-cta" href="/marketplace">

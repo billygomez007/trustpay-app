@@ -18,7 +18,5 @@ test('amendment reviews only allow accepted or rejected decisions', () => {
   assert.doesNotThrow(() =>
     reviewDealAmendmentSchema.parse({ decision: 'accepted', reason: 'Approved' })
   );
-  assert.throws(() =>
-    reviewDealAmendmentSchema.parse({ decision: 'pending', reason: 'Pending' })
-  );
+  assert.throws(() => reviewDealAmendmentSchema.parse({ decision: 'pending', reason: 'Pending' }));
 });

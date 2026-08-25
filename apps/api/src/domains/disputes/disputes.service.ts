@@ -23,7 +23,11 @@ export class DisputesService {
   public async listForParticipant(actorId: string) {
     return prisma.dealDispute.findMany({
       where: {
-        OR: [{ openedById: actorId }, { deal: { buyerId: actorId } }, { deal: { sellerId: actorId } }]
+        OR: [
+          { openedById: actorId },
+          { deal: { buyerId: actorId } },
+          { deal: { sellerId: actorId } }
+        ]
       },
       include: {
         deal: {
@@ -65,8 +69,15 @@ export class DisputesService {
     return dispute;
   }
 
-  public async submitEvidence(actorId: string, disputeId: string, input: SubmitDisputeEvidenceInput) {
-    const dispute = await prisma.dealDispute.findUnique({ where: { id: disputeId }, include: { deal: true } });
+  public async submitEvidence(
+    actorId: string,
+    disputeId: string,
+    input: SubmitDisputeEvidenceInput
+  ) {
+    const dispute = await prisma.dealDispute.findUnique({
+      where: { id: disputeId },
+      include: { deal: true }
+    });
     if (!dispute) throw new NotFoundException('Dispute not found.');
     this.assertParticipant(actorId, dispute);
     const evidence = await prisma.$transaction(async (transaction) => {
@@ -111,7 +122,10 @@ export class DisputesService {
   }
 
   public async respond(actorId: string, disputeId: string, input: SubmitDisputeResponseInput) {
-    const dispute = await prisma.dealDispute.findUnique({ where: { id: disputeId }, include: { deal: true } });
+    const dispute = await prisma.dealDispute.findUnique({
+      where: { id: disputeId },
+      include: { deal: true }
+    });
     if (!dispute) throw new NotFoundException('Dispute not found.');
     this.assertParticipant(actorId, dispute);
     if (actorId === dispute.openedById) {
@@ -153,8 +167,15 @@ export class DisputesService {
     return response;
   }
 
-  public async proposeResolution(actorId: string, disputeId: string, input: ProposeDisputeResolutionInput) {
-    const dispute = await prisma.dealDispute.findUnique({ where: { id: disputeId }, include: { deal: true } });
+  public async proposeResolution(
+    actorId: string,
+    disputeId: string,
+    input: ProposeDisputeResolutionInput
+  ) {
+    const dispute = await prisma.dealDispute.findUnique({
+      where: { id: disputeId },
+      include: { deal: true }
+    });
     if (!dispute) throw new NotFoundException('Dispute not found.');
     this.assertParticipant(actorId, dispute);
     const proposal = {
@@ -201,8 +222,15 @@ export class DisputesService {
     return updated;
   }
 
-  public async reviewResolution(actorId: string, disputeId: string, input: ReviewDisputeResolutionInput) {
-    const dispute = await prisma.dealDispute.findUnique({ where: { id: disputeId }, include: { deal: true } });
+  public async reviewResolution(
+    actorId: string,
+    disputeId: string,
+    input: ReviewDisputeResolutionInput
+  ) {
+    const dispute = await prisma.dealDispute.findUnique({
+      where: { id: disputeId },
+      include: { deal: true }
+    });
     if (!dispute) throw new NotFoundException('Dispute not found.');
     this.assertParticipant(actorId, dispute);
     if (actorId === dispute.resolutionProposedById) {
@@ -222,7 +250,10 @@ export class DisputesService {
         data: {
           dealId: dispute.dealId,
           actorId,
-          action: input.decision === 'accepted' ? 'deal.dispute.resolution_accepted' : 'deal.dispute.resolution_rejected',
+          action:
+            input.decision === 'accepted'
+              ? 'deal.dispute.resolution_accepted'
+              : 'deal.dispute.resolution_rejected',
           metadata: { disputeId, reason: input.reason }
         }
       });
@@ -257,7 +288,9 @@ export class DisputesService {
     if (['cancelled', 'refunded', 'released', 'completed'].includes(deal.status)) {
       throw new ForbiddenException('This Deal cannot be disputed.');
     }
-    const existing = await prisma.dealDispute.findFirst({ where: { dealId: input.dealId, status: { not: 'resolved' } } });
+    const existing = await prisma.dealDispute.findFirst({
+      where: { dealId: input.dealId, status: { not: 'resolved' } }
+    });
     if (existing) return existing;
     const dispute = await prisma.$transaction(async (transaction) => {
       const created = await transaction.dealDispute.create({
@@ -270,7 +303,14 @@ export class DisputesService {
         }
       });
       await transaction.deal.update({ where: { id: input.dealId }, data: { status: 'disputed' } });
-      await transaction.dealEvent.create({ data: { dealId: input.dealId, actorId, action: 'deal.dispute.opened', metadata: { disputeId: created.id } } });
+      await transaction.dealEvent.create({
+        data: {
+          dealId: input.dealId,
+          actorId,
+          action: 'deal.dispute.opened',
+          metadata: { disputeId: created.id }
+        }
+      });
       return created;
     });
     await Promise.all([
@@ -289,13 +329,21 @@ export class DisputesService {
         metadata: { dealId: input.dealId, disputeId: dispute.id }
       })
     ]);
-    await this.audit.record({ actorId, businessId: deal.businessId ?? undefined, action: 'dispute.opened', resource: `dispute:${dispute.id}` });
+    await this.audit.record({
+      actorId,
+      businessId: deal.businessId ?? undefined,
+      action: 'dispute.opened',
+      resource: `dispute:${dispute.id}`
+    });
     return dispute;
   }
 
   public async decide(actorId: string, disputeId: string, input: DisputeDecisionInput) {
     await this.requireDisputeReviewer(actorId);
-    const dispute = await prisma.dealDispute.findUnique({ where: { id: disputeId }, include: { deal: true } });
+    const dispute = await prisma.dealDispute.findUnique({
+      where: { id: disputeId },
+      include: { deal: true }
+    });
     if (!dispute) throw new NotFoundException('Dispute not found.');
     if (actorId === dispute.deal.buyerId || actorId === dispute.deal.sellerId) {
       throw new ForbiddenException('A dispute participant cannot decide the dispute.');
@@ -309,7 +357,12 @@ export class DisputesService {
       });
       await transaction.dealDispute.update({
         where: { id: disputeId },
-        data: { status: 'decided', resolutionDecision: input.outcome, resolutionDecisionById: actorId, resolutionDecisionAt: new Date() }
+        data: {
+          status: 'decided',
+          resolutionDecision: input.outcome,
+          resolutionDecisionById: actorId,
+          resolutionDecisionAt: new Date()
+        }
       });
       await transaction.dealEvent.create({
         data: {
@@ -331,15 +384,27 @@ export class DisputesService {
     return decision;
   }
 
-  private assertParticipant(actorId: string, dispute: { openedById: string; deal: { buyerId: string; sellerId: string } }) {
-    if (actorId !== dispute.openedById && actorId !== dispute.deal.buyerId && actorId !== dispute.deal.sellerId) {
+  private assertParticipant(
+    actorId: string,
+    dispute: { openedById: string; deal: { buyerId: string; sellerId: string } }
+  ) {
+    if (
+      actorId !== dispute.openedById &&
+      actorId !== dispute.deal.buyerId &&
+      actorId !== dispute.deal.sellerId
+    ) {
       throw new ForbiddenException('Only dispute participants may access this case.');
     }
   }
 
   private async requireDisputeReviewer(userId: string) {
     const assignments = await prisma.staffRoleAssignment.findMany({ where: { userId } });
-    if (!hasPermission(assignments.map((item) => item.role as Role), 'dispute:review')) {
+    if (
+      !hasPermission(
+        assignments.map((item) => item.role as Role),
+        'dispute:review'
+      )
+    ) {
       throw new ForbiddenException('Dispute review permission required.');
     }
   }

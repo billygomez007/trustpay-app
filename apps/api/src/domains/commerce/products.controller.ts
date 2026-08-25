@@ -11,8 +11,18 @@ export class ProductsController {
 
   @Public()
   @Get()
-  public list(@Query('search') search?: string, @Query('categoryId') categoryId?: string, @Query('location') location?: string, @Query('verified') verified?: string) {
-    return this.products.list({ ...(search ? { search } : {}), ...(categoryId ? { categoryId } : {}), ...(location ? { location } : {}), ...(verified === 'true' ? { verified: true } : {}) });
+  public list(
+    @Query('search') search?: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('location') location?: string,
+    @Query('verified') verified?: string
+  ) {
+    return this.products.list({
+      ...(search ? { search } : {}),
+      ...(categoryId ? { categoryId } : {}),
+      ...(location ? { location } : {}),
+      ...(verified === 'true' ? { verified: true } : {})
+    });
   }
 
   @Public()
@@ -32,7 +42,11 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  public update(@Req() request: AuthenticatedRequest, @Param('id') id: string, @Body() body: unknown) {
+  public update(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() body: unknown
+  ) {
     return this.products.update(request.user!.id, id, parseRequest(updateProductSchema, body));
   }
 

@@ -9,9 +9,7 @@ function formatDate(value: string) {
 }
 
 function titleCase(value: string) {
-  return value
-    .replaceAll('_', ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return value.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -40,17 +38,38 @@ export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: s
     };
   }, [params]);
 
-  const accountLabel = useMemo(() => caseData?.business?.name ?? caseData?.user?.email ?? 'Unassigned subject', [caseData]);
+  const accountLabel = useMemo(
+    () => caseData?.business?.name ?? caseData?.user?.email ?? 'Unassigned subject',
+    [caseData]
+  );
 
   const submitAction = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!caseData) return;
     const payload: {
-      status: 'open' | 'investigating' | 'under_review' | 'more_information_required' | 'resolved' | 'cleared' | 'action_required' | 'dismissed' | 'closed';
+      status:
+        | 'open'
+        | 'investigating'
+        | 'under_review'
+        | 'more_information_required'
+        | 'resolved'
+        | 'cleared'
+        | 'action_required'
+        | 'dismissed'
+        | 'closed';
       assignedReviewerId: string | null;
       investigationNotes?: string;
     } = {
-      status: status as 'open' | 'investigating' | 'under_review' | 'more_information_required' | 'resolved' | 'cleared' | 'action_required' | 'dismissed' | 'closed',
+      status: status as
+        | 'open'
+        | 'investigating'
+        | 'under_review'
+        | 'more_information_required'
+        | 'resolved'
+        | 'cleared'
+        | 'action_required'
+        | 'dismissed'
+        | 'closed',
       assignedReviewerId: reviewer || null
     };
     if (note.trim()) payload.investigationNotes = note.trim();
@@ -88,11 +107,18 @@ export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: s
   return (
     <main className="ops-app">
       <aside className="ops-sidebar">
-        <div className="ops-brand"><span className="brand-mark">T</span><span>TrustPay</span></div>
+        <div className="ops-brand">
+          <span className="brand-mark">T</span>
+          <span>TrustPay</span>
+        </div>
         <div className="ops-sidebar-label">Case</div>
         <nav className="ops-nav" aria-label="Case navigation">
-          <Link className="ops-nav-item" href="/operations/risk">← Risk queue</Link>
-          <Link className="ops-nav-item active" href="#">Case workspace</Link>
+          <Link className="ops-nav-item" href="/operations/risk">
+            ← Risk queue
+          </Link>
+          <Link className="ops-nav-item active" href="#">
+            Case workspace
+          </Link>
         </nav>
       </aside>
 
@@ -102,7 +128,10 @@ export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: s
             <span className="crumb">RISK / CASE WORKSPACE</span>
             <h1>{caseData.reason}</h1>
           </div>
-          <div className="operator-chip"><span className="avatar">RS</span><span>{titleCase(caseData.riskLevel)}</span></div>
+          <div className="operator-chip">
+            <span className="avatar">RS</span>
+            <span>{titleCase(caseData.riskLevel)}</span>
+          </div>
         </header>
 
         <div className="ops-content">
@@ -112,7 +141,9 @@ export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: s
             <article className="metric-card blue">
               <span className="metric-label">Account</span>
               <strong>{accountLabel}</strong>
-              <span className="metric-note">{caseData.user ? 'Customer account' : 'Business account'}</span>
+              <span className="metric-note">
+                {caseData.user ? 'Customer account' : 'Business account'}
+              </span>
             </article>
             <article className="metric-card orange">
               <span className="metric-label">Status</span>
@@ -126,7 +157,11 @@ export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: s
             </article>
             <article className="metric-card green">
               <span className="metric-label">Reviewer</span>
-              <strong>{caseData.assignedReviewerId ? caseData.assignedReviewerId.slice(0, 12) : 'Unassigned'}</strong>
+              <strong>
+                {caseData.assignedReviewerId
+                  ? caseData.assignedReviewerId.slice(0, 12)
+                  : 'Unassigned'}
+              </strong>
               <span className="metric-note">Assigned operator</span>
             </article>
           </div>
@@ -140,10 +175,22 @@ export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: s
                 </div>
               </div>
               <div className="detail-list">
-                <div><span>Subject</span><strong>{accountLabel}</strong></div>
-                <div><span>Risk level</span><strong>{titleCase(caseData.riskLevel)}</strong></div>
-                <div><span>Case status</span><strong>{titleCase(caseData.status)}</strong></div>
-                <div><span>Review notes</span><strong>{caseData.investigationNotes ?? 'No notes yet'}</strong></div>
+                <div>
+                  <span>Subject</span>
+                  <strong>{accountLabel}</strong>
+                </div>
+                <div>
+                  <span>Risk level</span>
+                  <strong>{titleCase(caseData.riskLevel)}</strong>
+                </div>
+                <div>
+                  <span>Case status</span>
+                  <strong>{titleCase(caseData.status)}</strong>
+                </div>
+                <div>
+                  <span>Review notes</span>
+                  <strong>{caseData.investigationNotes ?? 'No notes yet'}</strong>
+                </div>
               </div>
             </section>
 
@@ -169,11 +216,20 @@ export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: s
                 </label>
                 <label>
                   Assigned reviewer
-                  <input value={reviewer} onChange={(event) => setReviewer(event.target.value)} placeholder="Reviewer ID" />
+                  <input
+                    value={reviewer}
+                    onChange={(event) => setReviewer(event.target.value)}
+                    placeholder="Reviewer ID"
+                  />
                 </label>
                 <label>
                   Internal note
-                  <textarea rows={5} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Explain findings and next steps." />
+                  <textarea
+                    rows={5}
+                    value={note}
+                    onChange={(event) => setNote(event.target.value)}
+                    placeholder="Explain findings and next steps."
+                  />
                 </label>
                 <button type="submit">Save review update</button>
               </form>
@@ -198,12 +254,28 @@ export default function RiskCaseDetailPage({ params }: { params: Promise<{ id: s
                   </div>
                   <p>{signal.explanation}</p>
                   <div className="detail-list">
-                    <div><span>Source</span><strong>{String((signal.metadata as Record<string, unknown> | null)?.source ?? 'risk-evaluation')}</strong></div>
-                    <div><span>Created</span><strong>{formatDate(signal.createdAt)}</strong></div>
+                    <div>
+                      <span>Source</span>
+                      <strong>
+                        {String(
+                          (signal.metadata as Record<string, unknown> | null)?.source ??
+                            'risk-evaluation'
+                        )}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Created</span>
+                      <strong>{formatDate(signal.createdAt)}</strong>
+                    </div>
                   </div>
                 </article>
               ))}
-              {!caseData.signals?.length && <div className="customer-empty"><strong>No signals recorded.</strong><span>This case has no connected risk-signal records.</span></div>}
+              {!caseData.signals?.length && (
+                <div className="customer-empty">
+                  <strong>No signals recorded.</strong>
+                  <span>This case has no connected risk-signal records.</span>
+                </div>
+              )}
             </div>
           </section>
         </div>

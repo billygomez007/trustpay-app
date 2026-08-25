@@ -1,8 +1,11 @@
 'use client';
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3001/v1';
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  if (!baseUrl) {
+    throw new Error('TrustPay API is unavailable while protected transactions are in pre-launch.');
+  }
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
     credentials: 'include',
@@ -50,8 +53,21 @@ export type CustomerDeal = {
     acceptedAt: string | null;
   } | null;
   order?: { id: string; status: string } | null;
-  delivery?: { id: string; method: string; trackingReference: string | null; status: string; notes: string | null; deliveredAt: string | null } | null;
-  participants?: Array<{ id: string; userId: string | null; role: string; acceptedAt: string | null; user?: { profile?: { name: string } | null } | null }>;
+  delivery?: {
+    id: string;
+    method: string;
+    trackingReference: string | null;
+    status: string;
+    notes: string | null;
+    deliveredAt: string | null;
+  } | null;
+  participants?: Array<{
+    id: string;
+    userId: string | null;
+    role: string;
+    acceptedAt: string | null;
+    user?: { profile?: { name: string } | null } | null;
+  }>;
   amendments?: Array<{
     id: string;
     actorId: string;
@@ -67,7 +83,12 @@ export type CustomerDeal = {
     responseById: string | null;
     responseAt: string | null;
     responseSummary: string | null;
-    resolutionProposal: { outcome: string; notes: string; proposedById: string; proposedAt: string } | null;
+    resolutionProposal: {
+      outcome: string;
+      notes: string;
+      proposedById: string;
+      proposedAt: string;
+    } | null;
     resolutionDecision: string | null;
     resolutionDecisionById: string | null;
     resolutionDecisionAt: string | null;
@@ -110,9 +131,12 @@ export type DisputeCase = {
   responseSummary: string | null;
   responseById: string | null;
   responseAt: string | null;
-  resolutionProposal:
-    | { outcome: string; notes: string; proposedById: string; proposedAt: string }
-    | null;
+  resolutionProposal: {
+    outcome: string;
+    notes: string;
+    proposedById: string;
+    proposedAt: string;
+  } | null;
   resolutionDecision: string | null;
   resolutionDecisionById: string | null;
   resolutionDecisionAt: string | null;
@@ -216,13 +240,10 @@ export async function reviewDealAmendment(
   amendmentId: string,
   input: { decision: 'accepted' | 'rejected'; reason: string }
 ) {
-  return apiRequest<DealAmendment>(
-    `/deals/${dealId}/amendments/${amendmentId}/review`,
-    {
-      method: 'POST',
-      body: JSON.stringify(input)
-    }
-  );
+  return apiRequest<DealAmendment>(`/deals/${dealId}/amendments/${amendmentId}/review`, {
+    method: 'POST',
+    body: JSON.stringify(input)
+  });
 }
 
 export async function submitDisputeEvidence(
@@ -245,7 +266,14 @@ export type Product = {
   location: string | null;
   status: 'draft' | 'published' | 'unavailable';
   category: { id: string; name: string } | null;
-  seller: { id: string; name: string; verificationLevel: string; trustScore: number | null; completedDeals: number | null; averageRating: string | null };
+  seller: {
+    id: string;
+    name: string;
+    verificationLevel: string;
+    trustScore: number | null;
+    completedDeals: number | null;
+    averageRating: string | null;
+  };
 };
 
 export async function listProducts(search = ''): Promise<Product[]> {
@@ -261,23 +289,44 @@ export async function listSellerProducts(): Promise<Product[]> {
   return apiRequest<Product[]>('/products/seller/mine');
 }
 
-export async function createProduct(input: { title: string; description: string; price: string; currency: string; categoryId?: string; location?: string; status?: 'draft' | 'published' | 'unavailable' }) {
+export async function createProduct(input: {
+  title: string;
+  description: string;
+  price: string;
+  currency: string;
+  categoryId?: string;
+  location?: string;
+  status?: 'draft' | 'published' | 'unavailable';
+}) {
   return apiRequest<Product>('/products', { method: 'POST', body: JSON.stringify(input) });
 }
 
 export async function createOrder(productId: string) {
-  return apiRequest<{ id: string; dealId: string }>('/orders', { method: 'POST', body: JSON.stringify({ productId }) });
+  return apiRequest<{ id: string; dealId: string }>('/orders', {
+    method: 'POST',
+    body: JSON.stringify({ productId })
+  });
 }
 
 export async function prepareOrderPayment(orderId: string, providerCode = 'paystack') {
-  return apiRequest<{ id: string; reference: string; status: string }>(`/orders/${orderId}/payment-intents`, { method: 'POST', body: JSON.stringify({ providerCode, idempotencyKey: crypto.randomUUID() }) });
+  return apiRequest<{ id: string; reference: string; status: string }>(
+    `/orders/${orderId}/payment-intents`,
+    { method: 'POST', body: JSON.stringify({ providerCode, idempotencyKey: crypto.randomUUID() }) }
+  );
 }
 
 export async function confirmDelivery(dealId: string) {
-  return apiRequest(`/deals/${dealId}/transitions`, { method: 'POST', body: JSON.stringify({ targetStatus: 'buyer_confirmed' }) });
+  return apiRequest(`/deals/${dealId}/transitions`, {
+    method: 'POST',
+    body: JSON.stringify({ targetStatus: 'buyer_confirmed' })
+  });
 }
 
-export async function transitionDeal(dealId: string, targetStatus: string, metadata?: Record<string, unknown>) {
+export async function transitionDeal(
+  dealId: string,
+  targetStatus: string,
+  metadata?: Record<string, unknown>
+) {
   return apiRequest(`/deals/${dealId}/transitions`, {
     method: 'POST',
     body: JSON.stringify(metadata ? { targetStatus, metadata } : { targetStatus })
@@ -311,7 +360,16 @@ export async function getFraudCase(fraudCaseId: string): Promise<FraudCase> {
 export async function updateFraudCase(
   fraudCaseId: string,
   input: {
-    status?: 'open' | 'investigating' | 'under_review' | 'more_information_required' | 'resolved' | 'cleared' | 'action_required' | 'dismissed' | 'closed';
+    status?:
+      | 'open'
+      | 'investigating'
+      | 'under_review'
+      | 'more_information_required'
+      | 'resolved'
+      | 'cleared'
+      | 'action_required'
+      | 'dismissed'
+      | 'closed';
     assignedReviewerId?: string | null;
     investigationNotes?: string;
     evidence?: Record<string, unknown>;
@@ -332,7 +390,10 @@ export async function submitDisputeResponse(disputeId: string, response: string)
 
 export async function proposeDisputeResolution(
   disputeId: string,
-  input: { outcome: 'release' | 'refund' | 'partial_refund' | 'partial_release' | 'amend_terms'; notes: string }
+  input: {
+    outcome: 'release' | 'refund' | 'partial_refund' | 'partial_release' | 'amend_terms';
+    notes: string;
+  }
 ) {
   return apiRequest(`/disputes/${disputeId}/resolution`, {
     method: 'POST',

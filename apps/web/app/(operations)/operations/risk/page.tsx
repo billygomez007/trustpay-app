@@ -14,9 +14,7 @@ function formatDate(value: string) {
 }
 
 function titleCase(value: string) {
-  return value
-    .replaceAll('_', ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return value.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 export default function TrustRiskQueuePage() {
@@ -60,23 +58,53 @@ export default function TrustRiskQueuePage() {
     });
   }, [cases, signalFilter, severityFilter, statusFilter]);
 
-  const metrics = useMemo(() => ({
-    open: cases.filter((item) => ['open', 'investigating', 'under_review', 'more_information_required', 'action_required'].includes(item.status)).length,
-    highPriority: cases.filter((item) => ['high', 'critical', 'critical_review'].includes(item.riskLevel)).length,
-    disputed: signals.filter((signal) => ['dispute_patterns', 'seller_risk', 'payment_mismatch', 'refund_pattern'].includes(signal.signalType)).length,
-    verificationIssues: signals.filter((signal) => signal.signalType.includes('verification') || signal.signalType.includes('identity')).length
-  }), [cases, signals]);
+  const metrics = useMemo(
+    () => ({
+      open: cases.filter((item) =>
+        [
+          'open',
+          'investigating',
+          'under_review',
+          'more_information_required',
+          'action_required'
+        ].includes(item.status)
+      ).length,
+      highPriority: cases.filter((item) =>
+        ['high', 'critical', 'critical_review'].includes(item.riskLevel)
+      ).length,
+      disputed: signals.filter((signal) =>
+        ['dispute_patterns', 'seller_risk', 'payment_mismatch', 'refund_pattern'].includes(
+          signal.signalType
+        )
+      ).length,
+      verificationIssues: signals.filter(
+        (signal) =>
+          signal.signalType.includes('verification') || signal.signalType.includes('identity')
+      ).length
+    }),
+    [cases, signals]
+  );
 
   return (
     <main className="ops-app">
       <aside className="ops-sidebar">
-        <div className="ops-brand"><span className="brand-mark">T</span><span>TrustPay</span></div>
+        <div className="ops-brand">
+          <span className="brand-mark">T</span>
+          <span>TrustPay</span>
+        </div>
         <div className="ops-sidebar-label">Safety</div>
         <nav className="ops-nav" aria-label="Safety navigation">
-          <Link className="ops-nav-item" href="/operations">Overview</Link>
-          <Link className="ops-nav-item active" href="/operations/risk">Risk queue</Link>
+          <Link className="ops-nav-item" href="/operations">
+            Overview
+          </Link>
+          <Link className="ops-nav-item active" href="/operations/risk">
+            Risk queue
+          </Link>
         </nav>
-        <div className="ops-sidebar-footer"><span className="status-dot" />Internal review only</div>
+        <div className="ops-sidebar-footer">
+          <span className="status-dot" />
+          Internal review only
+        </div>
       </aside>
 
       <section className="ops-main">
@@ -85,7 +113,10 @@ export default function TrustRiskQueuePage() {
             <span className="crumb">TRUSTPAY / RISK COMMAND CENTER</span>
             <h1>Review queue</h1>
           </div>
-          <div className="operator-chip"><span className="avatar">TS</span><span>Trust & Safety</span></div>
+          <div className="operator-chip">
+            <span className="avatar">TS</span>
+            <span>Trust & Safety</span>
+          </div>
         </header>
 
         <div className="ops-content">
@@ -121,9 +152,16 @@ export default function TrustRiskQueuePage() {
 
           <section className="panel table-panel">
             <div className="table-toolbar">
-              <span>{loading ? 'Loading risk queue…' : `${visibleCases.length} case${visibleCases.length === 1 ? '' : 's'}`}</span>
+              <span>
+                {loading
+                  ? 'Loading risk queue…'
+                  : `${visibleCases.length} case${visibleCases.length === 1 ? '' : 's'}`}
+              </span>
               <div className="filter-row">
-                <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value)}
+                >
                   <option value="all">All statuses</option>
                   <option value="open">Open</option>
                   <option value="investigating">Investigating</option>
@@ -133,7 +171,10 @@ export default function TrustRiskQueuePage() {
                   <option value="cleared">Cleared</option>
                   <option value="closed">Closed</option>
                 </select>
-                <select value={severityFilter} onChange={(event) => setSeverityFilter(event.target.value)}>
+                <select
+                  value={severityFilter}
+                  onChange={(event) => setSeverityFilter(event.target.value)}
+                >
                   <option value="all">All severities</option>
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -141,10 +182,15 @@ export default function TrustRiskQueuePage() {
                   <option value="critical">Critical</option>
                   <option value="critical_review">Critical review</option>
                 </select>
-                <select value={signalFilter} onChange={(event) => setSignalFilter(event.target.value)}>
+                <select
+                  value={signalFilter}
+                  onChange={(event) => setSignalFilter(event.target.value)}
+                >
                   <option value="all">All signal types</option>
                   {signalTypes.map((signalType) => (
-                    <option key={signalType} value={signalType}>{titleCase(signalType)}</option>
+                    <option key={signalType} value={signalType}>
+                      {titleCase(signalType)}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -171,15 +217,23 @@ export default function TrustRiskQueuePage() {
                         <span className="subtle">{item.id.slice(0, 8)}…</span>
                       </td>
                       <td>
-                        <strong>{item.business?.name ?? item.user?.email ?? 'Unassigned subject'}</strong>
-                        <span className="subtle">{item.user?.email ?? item.business?.id ?? 'Internal review'}</span>
+                        <strong>
+                          {item.business?.name ?? item.user?.email ?? 'Unassigned subject'}
+                        </strong>
+                        <span className="subtle">
+                          {item.user?.email ?? item.business?.id ?? 'Internal review'}
+                        </span>
                       </td>
                       <td>
                         <span className="status-badge">{titleCase(item.riskLevel)}</span>
                       </td>
                       <td>{titleCase(item.status)}</td>
                       <td className="subtle">{formatDate(item.createdAt)}</td>
-                      <td className="subtle">{item.assignedReviewerId ? item.assignedReviewerId.slice(0, 8) : 'Unassigned'}</td>
+                      <td className="subtle">
+                        {item.assignedReviewerId
+                          ? item.assignedReviewerId.slice(0, 8)
+                          : 'Unassigned'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

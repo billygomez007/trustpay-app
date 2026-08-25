@@ -33,14 +33,17 @@ function toMinor(value: string): bigint {
 
 @Injectable()
 export class LedgerService {
-  public async postJournal(input: {
-    reference: string;
-    source: string;
-    description: string;
-    dealId?: string;
-    paymentIntentId?: string;
-    lines: readonly LedgerLineInput[];
-  }, transactionClient?: Prisma.TransactionClient) {
+  public async postJournal(
+    input: {
+      reference: string;
+      source: string;
+      description: string;
+      dealId?: string;
+      paymentIntentId?: string;
+      lines: readonly LedgerLineInput[];
+    },
+    transactionClient?: Prisma.TransactionClient
+  ) {
     assertBalanced(input.lines);
     if (transactionClient) {
       return this.createJournal(transactionClient, input);

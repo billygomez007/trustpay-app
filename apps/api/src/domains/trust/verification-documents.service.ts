@@ -39,7 +39,12 @@ export class VerificationDocumentsService {
       data: {
         ownerUserId: userId,
         ownerBusinessId: input.businessVerificationId
-          ? (await prisma.businessVerification.findUnique({ where: { id: input.businessVerificationId }, select: { businessId: true } }))?.businessId ?? null
+          ? ((
+              await prisma.businessVerification.findUnique({
+                where: { id: input.businessVerificationId },
+                select: { businessId: true }
+              })
+            )?.businessId ?? null)
           : null,
         identityVerificationId: input.identityVerificationId ?? null,
         businessVerificationId: input.businessVerificationId ?? null,

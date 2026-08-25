@@ -24,7 +24,15 @@ export class OrdersController {
   }
 
   @Post(':id/payment-intents')
-  public preparePayment(@Req() request: AuthenticatedRequest, @Param('id') id: string, @Body() body: unknown) {
-    return this.orders.preparePayment(request.user!.id, id, parseRequest(prepareOrderPaymentSchema, body));
+  public preparePayment(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() body: unknown
+  ) {
+    return this.orders.preparePayment(
+      request.user!.id,
+      id,
+      parseRequest(prepareOrderPaymentSchema, body)
+    );
   }
 }

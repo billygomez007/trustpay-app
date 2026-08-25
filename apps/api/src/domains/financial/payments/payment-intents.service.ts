@@ -78,7 +78,11 @@ export class PaymentIntentsService {
     return intent;
   }
 
-  public async processWebhook(providerCode: string, signature: string | undefined, rawPayload: unknown) {
+  public async processWebhook(
+    providerCode: string,
+    signature: string | undefined,
+    rawPayload: unknown
+  ) {
     const provider = this.providers.get(providerCode);
     const normalized = await provider.normalizeWebhookEvent(rawPayload);
     const input = providerWebhookSchema.parse(normalized);
@@ -86,8 +90,14 @@ export class PaymentIntentsService {
       throw new ForbiddenException('Webhook signature verification failed.');
     }
     const verification = await provider.verifyTransaction({ reference: input.providerReference });
-    if (!verification.success || verification.amount !== input.amount || verification.currency !== input.currency) {
-      throw new BadRequestException('Provider transaction verification does not match the Payment Intent.');
+    if (
+      !verification.success ||
+      verification.amount !== input.amount ||
+      verification.currency !== input.currency
+    ) {
+      throw new BadRequestException(
+        'Provider transaction verification does not match the Payment Intent.'
+      );
     }
     const result = await prisma.$transaction(async (transaction) => {
       const prior = await transaction.webhookEvent.findUnique({
@@ -110,11 +120,16 @@ export class PaymentIntentsService {
       });
       if (!intent) throw new NotFoundException('Payment intent not found.');
       if (input.amount !== intent.amount.toFixed(2) || input.currency !== intent.currency) {
-        throw new BadRequestException('Provider payment amount or currency does not match the Payment Intent.');
+        throw new BadRequestException(
+          'Provider payment amount or currency does not match the Payment Intent.'
+        );
       }
 
       if (input.eventType === 'payment.failed') {
-        await transaction.paymentIntent.update({ where: { id: intent.id }, data: { status: 'failed' } });
+        await transaction.paymentIntent.update({
+          where: { id: intent.id },
+          data: { status: 'failed' }
+        });
         await transaction.financialEvent.create({
           data: {
             reference: `FE-${crypto.randomUUID().slice(0, 12).toUpperCase()}`,
@@ -167,31 +182,34 @@ export class PaymentIntentsService {
           metadata: { paymentIntentId: intent.id }
         }
       });
-      await this.ledger.postJournal({
-        reference: `JE-${intent.reference}`,
-        source: 'payment_provider_confirmation',
-        description: `Payment secured for ${intent.deal.reference}`,
-        dealId: intent.dealId,
-        paymentIntentId: intent.id,
-        lines: [
-          {
-            accountCode: `customer-payment-${intent.currency}`,
-            accountName: 'Customer Payment Clearing',
-            accountType: 'asset',
-            direction: 'debit',
-            amount: intent.amount.toFixed(2),
-            currency: intent.currency
-          },
-          {
-            accountCode: `protected-transaction-${intent.currency}`,
-            accountName: 'Protected Transaction Liability',
-            accountType: 'liability',
-            direction: 'credit',
-            amount: intent.amount.toFixed(2),
-            currency: intent.currency
-          }
-        ]
-      }, transaction);
+      await this.ledger.postJournal(
+        {
+          reference: `JE-${intent.reference}`,
+          source: 'payment_provider_confirmation',
+          description: `Payment secured for ${intent.deal.reference}`,
+          dealId: intent.dealId,
+          paymentIntentId: intent.id,
+          lines: [
+            {
+              accountCode: `customer-payment-${intent.currency}`,
+              accountName: 'Customer Payment Clearing',
+              accountType: 'asset',
+              direction: 'debit',
+              amount: intent.amount.toFixed(2),
+              currency: intent.currency
+            },
+            {
+              accountCode: `protected-transaction-${intent.currency}`,
+              accountName: 'Protected Transaction Liability',
+              accountType: 'liability',
+              direction: 'credit',
+              amount: intent.amount.toFixed(2),
+              currency: intent.currency
+            }
+          ]
+        },
+        transaction
+      );
       await transaction.webhookEvent.update({
         where: {
           providerCode_providerEventId: { providerCode, providerEventId: input.providerEventId }

@@ -40,14 +40,21 @@ export class PaystackPaymentProvider implements PaymentProvider {
         }
       })
     });
-    const payload = (await response.json()) as { status?: boolean; message?: string; data?: { reference?: string } };
+    const payload = (await response.json()) as {
+      status?: boolean;
+      message?: string;
+      data?: { reference?: string };
+    };
     if (!response.ok || !payload.status || !payload.data?.reference) {
       throw new Error(payload.message ?? 'Paystack payment initialization failed.');
     }
     return { providerReference: payload.data.reference, status: 'pending' };
   }
 
-  public async verifyWebhook(input: { signature: string | undefined; payload: unknown }): Promise<boolean> {
+  public async verifyWebhook(input: {
+    signature: string | undefined;
+    payload: unknown;
+  }): Promise<boolean> {
     const secret = process.env.PAYSTACK_SECRET_KEY;
     if (!secret || !input.payload || !input.signature) return false;
     const expected = createPaystackWebhookSignature(secret, input.payload);
@@ -81,15 +88,26 @@ export class PaystackPaymentProvider implements PaymentProvider {
     };
   }
 
-  public async verifyTransaction(input: { reference: string }): Promise<{ success: boolean; status: string; amount: string; currency: string; providerReference: string }> {
+  public async verifyTransaction(input: {
+    reference: string;
+  }): Promise<{
+    success: boolean;
+    status: string;
+    amount: string;
+    currency: string;
+    providerReference: string;
+  }> {
     const reference = String(input.reference ?? '').trim();
     if (!reference) {
       throw new BadRequestException('Missing Paystack transaction reference.');
     }
     this.requireConfiguration();
-    const response = await fetch(`${this.apiBaseUrl}/transaction/verify/${encodeURIComponent(reference)}`, {
-      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` }
-    });
+    const response = await fetch(
+      `${this.apiBaseUrl}/transaction/verify/${encodeURIComponent(reference)}`,
+      {
+        headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` }
+      }
+    );
     const payload = (await response.json()) as {
       status?: boolean;
       message?: string;
@@ -108,7 +126,9 @@ export class PaystackPaymentProvider implements PaymentProvider {
     };
   }
 
-  public async getTransactionStatus(input: { reference: string }): Promise<{ status: string; amount: string; currency: string; success: boolean }> {
+  public async getTransactionStatus(input: {
+    reference: string;
+  }): Promise<{ status: string; amount: string; currency: string; success: boolean }> {
     const verification = await this.verifyTransaction(input);
     return {
       status: verification.status,
@@ -138,7 +158,11 @@ export class PaystackPaymentProvider implements PaymentProvider {
         reason: input.reason ?? 'TrustPay refund request'
       })
     });
-    const payload = (await response.json()) as { status?: boolean; message?: string; data?: { reference?: string; status?: string } };
+    const payload = (await response.json()) as {
+      status?: boolean;
+      message?: string;
+      data?: { reference?: string; status?: string };
+    };
     if (!response.ok || !payload.status || !payload.data?.reference) {
       throw new Error(payload.message ?? 'Paystack refund request failed.');
     }
@@ -156,7 +180,9 @@ export class PaystackPaymentProvider implements PaymentProvider {
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }
 
 function createPaystackWebhookSignature(secret: string, payload: unknown): string {
@@ -173,7 +199,10 @@ function safeCompare(expected: string, actual: string): boolean {
 function toMinorUnits(amount: string, currency: string): bigint {
   const normalized = String(amount ?? '0').trim();
   const [whole = '0', fraction = ''] = normalized.split('.');
-  const minor = currency && ['GHS', 'NGN', 'KES', 'UGX', 'TZS', 'XOF', 'XAF'].includes(currency.toUpperCase()) ? 2 : 2;
+  const minor =
+    currency && ['GHS', 'NGN', 'KES', 'UGX', 'TZS', 'XOF', 'XAF'].includes(currency.toUpperCase())
+      ? 2
+      : 2;
   void minor;
   const digits = `${whole}${fraction.padEnd(2, '0').slice(0, 2)}`;
   return BigInt(digits || '0');

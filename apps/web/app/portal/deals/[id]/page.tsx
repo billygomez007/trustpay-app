@@ -175,7 +175,9 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
   const [disputeReason, setDisputeReason] = useState('');
 
   useEffect(() => {
-    void getCurrentUser().then(setCurrentUser).catch(() => setCurrentUser(null));
+    void getCurrentUser()
+      .then(setCurrentUser)
+      .catch(() => setCurrentUser(null));
   }, []);
 
   useEffect(() => {
@@ -197,7 +199,13 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
     () => (deal?.amendments ?? []).filter((amendment) => amendment.status === 'requested'),
     [deal]
   );
-  const openDisputeEntry = useMemo(() => (deal?.disputes ?? []).find((item) => item.status !== 'resolved' && item.status !== 'dismissed'), [deal]);
+  const openDisputeEntry = useMemo(
+    () =>
+      (deal?.disputes ?? []).find(
+        (item) => item.status !== 'resolved' && item.status !== 'dismissed'
+      ),
+    [deal]
+  );
 
   if (!deal) {
     return (
@@ -244,7 +252,11 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
   const submitDispute = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      await openDispute({ dealId: deal.id, reason: disputeReason || 'Transaction dispute', description: evidenceDescription });
+      await openDispute({
+        dealId: deal.id,
+        reason: disputeReason || 'Transaction dispute',
+        description: evidenceDescription
+      });
       setMessage('Dispute submitted for review.');
       setDisputeReason('');
       setEvidenceDescription('');
@@ -334,7 +346,10 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
 
   const acceptAmendment = async (amendment: DealAmendment) => {
     try {
-      await reviewDealAmendment(deal.id, amendment.id, { decision: 'accepted', reason: 'Accepted by counterparty' });
+      await reviewDealAmendment(deal.id, amendment.id, {
+        decision: 'accepted',
+        reason: 'Accepted by counterparty'
+      });
       setMessage('Amendment accepted.');
     } catch {
       setMessage('The amendment could not be accepted.');
@@ -343,7 +358,10 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
 
   const rejectAmendment = async (amendment: DealAmendment) => {
     try {
-      await reviewDealAmendment(deal.id, amendment.id, { decision: 'rejected', reason: 'Rejected by counterparty' });
+      await reviewDealAmendment(deal.id, amendment.id, {
+        decision: 'rejected',
+        reason: 'Rejected by counterparty'
+      });
       setMessage('Amendment rejected.');
     } catch {
       setMessage('The amendment could not be rejected.');
@@ -397,18 +415,26 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
               </div>
               <div>
                 <span>Accepted</span>
-                <strong>{deal.terms?.acceptedAt ? new Date(deal.terms.acceptedAt).toLocaleDateString('en-GH') : 'Pending'}</strong>
+                <strong>
+                  {deal.terms?.acceptedAt
+                    ? new Date(deal.terms.acceptedAt).toLocaleDateString('en-GH')
+                    : 'Pending'}
+                </strong>
               </div>
             </div>
             <div className="agreement-copy">
               <p>
-                <strong>Description:</strong> {deal.description || 'No additional description provided.'}
+                <strong>Description:</strong>{' '}
+                {deal.description || 'No additional description provided.'}
               </p>
               <p>
-                <strong>Release conditions:</strong> {deal.terms?.completionRequirements || 'Release follows the protected transaction process.'}
+                <strong>Release conditions:</strong>{' '}
+                {deal.terms?.completionRequirements ||
+                  'Release follows the protected transaction process.'}
               </p>
               <p>
-                <strong>Return / deduction conditions:</strong> {deal.terms?.cancellationRules || 'Not specified yet.'}
+                <strong>Return / deduction conditions:</strong>{' '}
+                {deal.terms?.cancellationRules || 'Not specified yet.'}
               </p>
               <p>
                 <strong>Additional notes:</strong> {deal.terms?.additionalNotes || 'None'}
@@ -426,9 +452,15 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
             <div className="timeline-panel-inner">
               {timeline.map((event, index) => (
                 <div className="timeline-row" key={`${event.id}-${event.createdAt}`}>
-                  <span className={index === timeline.length - 1 ? 'timeline-dot current' : 'timeline-dot'} />
+                  <span
+                    className={
+                      index === timeline.length - 1 ? 'timeline-dot current' : 'timeline-dot'
+                    }
+                  />
                   <div>
-                    <strong>{timelineLabels[event.action] ?? event.action.replaceAll('.', ' ')}</strong>
+                    <strong>
+                      {timelineLabels[event.action] ?? event.action.replaceAll('.', ' ')}
+                    </strong>
                     <span>{new Date(event.createdAt).toLocaleString('en-GH')}</span>
                   </div>
                 </div>
@@ -453,24 +485,42 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
               <form className="detail-form" onSubmit={submitAmendment}>
                 <label>
                   Reason
-                  <input value={amendmentReason} onChange={(event) => setAmendmentReason(event.target.value)} required />
+                  <input
+                    value={amendmentReason}
+                    onChange={(event) => setAmendmentReason(event.target.value)}
+                    required
+                  />
                 </label>
                 <label>
                   Title
-                  <input value={amendmentTitle} onChange={(event) => setAmendmentTitle(event.target.value)} />
+                  <input
+                    value={amendmentTitle}
+                    onChange={(event) => setAmendmentTitle(event.target.value)}
+                  />
                 </label>
                 <label>
                   Description
-                  <textarea value={amendmentDescription} onChange={(event) => setAmendmentDescription(event.target.value)} rows={3} />
+                  <textarea
+                    value={amendmentDescription}
+                    onChange={(event) => setAmendmentDescription(event.target.value)}
+                    rows={3}
+                  />
                 </label>
                 <div className="form-split">
                   <label>
                     Amount
-                    <input inputMode="decimal" value={amendmentAmount} onChange={(event) => setAmendmentAmount(event.target.value)} />
+                    <input
+                      inputMode="decimal"
+                      value={amendmentAmount}
+                      onChange={(event) => setAmendmentAmount(event.target.value)}
+                    />
                   </label>
                   <label>
                     Currency
-                    <input value={amendmentCurrency} onChange={(event) => setAmendmentCurrency(event.target.value.toUpperCase())} />
+                    <input
+                      value={amendmentCurrency}
+                      onChange={(event) => setAmendmentCurrency(event.target.value.toUpperCase())}
+                    />
                   </label>
                 </div>
                 <label>
@@ -483,42 +533,58 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
                 </label>
                 <label>
                   Delivery expectations
-                  <textarea value={amendmentDelivery} onChange={(event) => setAmendmentDelivery(event.target.value)} rows={3} />
+                  <textarea
+                    value={amendmentDelivery}
+                    onChange={(event) => setAmendmentDelivery(event.target.value)}
+                    rows={3}
+                  />
                 </label>
                 <label>
                   Return or deduction conditions
-                  <textarea value={amendmentCancellation} onChange={(event) => setAmendmentCancellation(event.target.value)} rows={3} />
+                  <textarea
+                    value={amendmentCancellation}
+                    onChange={(event) => setAmendmentCancellation(event.target.value)}
+                    rows={3}
+                  />
                 </label>
                 <button type="submit">Propose amendment</button>
               </form>
 
               <div className="amendment-list">
-                {pendingAmendments.map((amendment) => (
+                {pendingAmendments.map((amendment) =>
                   (() => {
                     const changes = amendment.changes as { reason?: string };
                     return (
-                  <article className="amendment-card" key={amendment.id}>
-                    <strong>Pending amendment</strong>
-                    <p>{changes.reason || 'Agreement change proposed.'}</p>
-                    <small>Submitted {new Date(amendment.createdAt).toLocaleString('en-GH')}</small>
-                    {(isBuyer || isSeller) && currentUser?.id !== amendment.actorId ? (
-                      <div className="amendment-actions">
-                        <button type="button" onClick={() => acceptAmendment(amendment)}>
-                          Accept
-                        </button>
-                        <button type="button" className="secondary" onClick={() => rejectAmendment(amendment)}>
-                          Reject
-                        </button>
-                      </div>
-                    ) : null}
-                  </article>
+                      <article className="amendment-card" key={amendment.id}>
+                        <strong>Pending amendment</strong>
+                        <p>{changes.reason || 'Agreement change proposed.'}</p>
+                        <small>
+                          Submitted {new Date(amendment.createdAt).toLocaleString('en-GH')}
+                        </small>
+                        {(isBuyer || isSeller) && currentUser?.id !== amendment.actorId ? (
+                          <div className="amendment-actions">
+                            <button type="button" onClick={() => acceptAmendment(amendment)}>
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              className="secondary"
+                              onClick={() => rejectAmendment(amendment)}
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : null}
+                      </article>
                     );
                   })()
-                ))}
+                )}
                 {!pendingAmendments.length && (
                   <div className="empty">
                     <strong>No pending amendments</strong>
-                    <span>Accepted agreement history is preserved here once a change is proposed.</span>
+                    <span>
+                      Accepted agreement history is preserved here once a change is proposed.
+                    </span>
                   </div>
                 )}
               </div>
@@ -537,7 +603,9 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
                 <article className="support-card" key={dispute.id}>
                   <strong>{dispute.reason}</strong>
                   <p>{dispute.description}</p>
-                  <span className={`customer-status ${dispute.status}`}>{formatStatus(dispute.status)}</span>
+                  <span className={`customer-status ${dispute.status}`}>
+                    {formatStatus(dispute.status)}
+                  </span>
                   {dispute.evidence.map((evidence) => (
                     <div className="evidence-row" key={evidence.id}>
                       <span>{evidence.kind}</span>
@@ -549,7 +617,9 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
               {!deal.disputes?.length && (
                 <div className="empty">
                   <strong>No disputes yet</strong>
-                  <span>Evidence and dispute records will appear here if the transaction is challenged.</span>
+                  <span>
+                    Evidence and dispute records will appear here if the transaction is challenged.
+                  </span>
                 </div>
               )}
             </div>
@@ -571,21 +641,25 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
                 Pay now <span>→</span>
               </button>
             )}
-            {isSeller && ['payment_secured', 'seller_accepted', 'fulfillment_started'].includes(deal.status) && (
-              <button className="confirm-delivery" onClick={moveForward}>
-                {deal.status === 'payment_secured'
-                  ? 'Accept transaction'
-                  : deal.status === 'seller_accepted'
-                    ? 'Mark service in progress'
-                    : deal.type === 'service'
-                      ? 'Submit service completion'
-                      : 'Confirm asset returned'}{' '}
-                <span>→</span>
-              </button>
-            )}
+            {isSeller &&
+              ['payment_secured', 'seller_accepted', 'fulfillment_started'].includes(
+                deal.status
+              ) && (
+                <button className="confirm-delivery" onClick={moveForward}>
+                  {deal.status === 'payment_secured'
+                    ? 'Accept transaction'
+                    : deal.status === 'seller_accepted'
+                      ? 'Mark service in progress'
+                      : deal.type === 'service'
+                        ? 'Submit service completion'
+                        : 'Confirm asset returned'}{' '}
+                  <span>→</span>
+                </button>
+              )}
             {isBuyer && ['delivered', 'inspection_period'].includes(deal.status) && (
               <button className="confirm-delivery" onClick={confirmCompletion}>
-                {deal.type === 'service' ? 'Confirm service completion' : 'Confirm receipt'} <span>→</span>
+                {deal.type === 'service' ? 'Confirm service completion' : 'Confirm receipt'}{' '}
+                <span>→</span>
               </button>
             )}
             <details>
@@ -613,11 +687,17 @@ export default function DealDetailPage({ params }: { params: Promise<{ id: strin
                 <form onSubmit={submitEvidence}>
                   <label>
                     Evidence type
-                    <input value={evidenceKind} onChange={(event) => setEvidenceKind(event.target.value)} />
+                    <input
+                      value={evidenceKind}
+                      onChange={(event) => setEvidenceKind(event.target.value)}
+                    />
                   </label>
                   <label>
                     Reference
-                    <input value={evidenceReference} onChange={(event) => setEvidenceReference(event.target.value)} />
+                    <input
+                      value={evidenceReference}
+                      onChange={(event) => setEvidenceReference(event.target.value)}
+                    />
                   </label>
                   <label>
                     Notes

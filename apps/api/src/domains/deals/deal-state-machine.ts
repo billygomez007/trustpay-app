@@ -46,7 +46,9 @@ export function assertActorCanTransition(input: {
     );
   }
   if (['release_pending', 'released', 'refunded'].includes(input.target)) {
-    throw new ForbiddenException('This financial transition requires a verified internal workflow.');
+    throw new ForbiddenException(
+      'This financial transition requires a verified internal workflow.'
+    );
   }
   if (
     ['seller_accepted', 'fulfillment_started', 'delivered', 'inspection_period'].includes(
