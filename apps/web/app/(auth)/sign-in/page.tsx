@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { apiRequest } from '../../components/api';
 
 export default function SignInPage() {
@@ -18,16 +19,23 @@ export default function SignInPage() {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      router.replace('/portal');
-    } catch {
-      setError('Unable to sign in. Check your credentials and try again.');
+      const next = new URLSearchParams(window.location.search).get('next');
+      router.replace(next?.startsWith('/') && !next.startsWith('//') ? next : '/portal');
+    } catch (error) {
+      setError(
+        error instanceof Error && error.message.includes('pre-launch')
+          ? 'Sign-in is currently unavailable while TrustPay is in pre-launch.'
+          : 'Unable to sign in. Check your credentials and try again.'
+      );
     }
   };
 
   return (
     <main className="auth-page">
       <form className="auth-card" onSubmit={submit}>
-        <p className="eyebrow">TrustPay</p>
+        <Link className="market-brand auth-brand" href="/">
+          <span>T</span> TrustPay
+        </Link>
         <h1>Sign in securely.</h1>
         <label>
           Email

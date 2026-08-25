@@ -42,7 +42,7 @@ export default function SellerStorefrontPage({ params }: { params: Promise<{ id:
         </Link>
         <nav>
           <Link href="/marketplace">Marketplace</Link>
-          <Link href="/portal">My transactions</Link>
+          <Link href="/sign-in?next=%2Fportal">My transactions</Link>
           <Link className="market-signin" href="/sign-in">
             Sign in
           </Link>
@@ -91,7 +91,7 @@ export default function SellerStorefrontPage({ params }: { params: Promise<{ id:
             <span>Average rating</span>
             <strong>{seller.averageRating || '—'}</strong>
           </div>
-          <Link href="/portal/deals/create" className="trust-cta">
+          <Link href="/sign-in?next=%2Fportal%2Fdeals%2Fcreate" className="trust-cta">
             Start a protected Deal <span>→</span>
           </Link>
         </aside>

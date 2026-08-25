@@ -137,8 +137,8 @@ export default function CustomerDealsPage() {
           </div>
           {!bucket.items.length && (
             <div className="customer-empty">
-              <strong>No transactions in this group</strong>
-              <span>Protected transactions will appear here when their state changes.</span>
+              <strong>No protected transactions here yet</strong>
+              <span>Transactions will appear here as they move through this stage.</span>
             </div>
           )}
         </section>

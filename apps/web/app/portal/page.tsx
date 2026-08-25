@@ -28,10 +28,10 @@ export default function CustomerPortalPage() {
       items={['Home', 'My Deals', 'Invitations', 'Trust Profile', 'Notifications', 'Profile']}
     >
       <p className="eyebrow">TrustPay Protect</p>
-      <h1>Protected transactions, from your browser.</h1>
+      <h1>Your protected transactions in one place.</h1>
       <p className="lede">
-        Create and follow a Deal with the same secure session, authorization, notifications, and
-        Trust data used by TrustPay mobile.
+        Create and follow agreements, review updates from the other party, and keep your Trust
+        Profile close at hand.
       </p>
       <div className="cards">
         <article>
@@ -41,8 +41,8 @@ export default function CustomerPortalPage() {
         </article>
         <article>
           <span>Invitations</span>
-          <strong>—</strong>
-          <Link href="/portal/deals">View Deal activity</Link>
+          <strong>None yet</strong>
+          <Link href="/portal/deals">View transaction activity</Link>
         </article>
         <article>
           <span>Notifications</span>
@@ -51,18 +51,18 @@ export default function CustomerPortalPage() {
         </article>
         <article>
           <span>Disputes</span>
-          <strong>Protect</strong>
+          <strong>None active</strong>
           <Link href="/portal/disputes">Open dispute center</Link>
         </article>
         <article>
           <span>Trust Profile</span>
-          <strong>Private</strong>
+          <strong>Your profile</strong>
           <Link href="/portal/trust">View Trust Profile</Link>
         </article>
         <article>
           <span>Create a Deal</span>
-          <strong>Protect</strong>
-          <Link href="/portal/deals/create">Start Deal</Link>
+          <strong>Start here</strong>
+          <Link href="/portal/deals/create">Start a transaction</Link>
         </article>
       </div>
     </DashboardShell>

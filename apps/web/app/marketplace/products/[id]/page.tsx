@@ -1,17 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import {
-  createOrder,
-  getProduct,
-  prepareOrderPayment,
-  type Product
-} from '../../../components/api';
+import { getProduct, type Product } from '../../../components/api';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [message, setMessage] = useState('');
   useEffect(() => {
@@ -31,17 +24,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         <div className="market-empty">{message || 'Loading listing…'}</div>
       </main>
     );
-  const buy = async () => {
-    setMessage('Creating your protected order…');
-    try {
-      const order = await createOrder(product.id);
-      await prepareOrderPayment(order.id, 'paystack');
-      router.push(`/portal/deals/${order.dealId}`);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Paystack is not configured.';
-      setMessage(message);
-    }
-  };
   return (
     <main className="product-page">
       <header className="market-header">
@@ -50,7 +32,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </Link>
         <nav>
           <Link href="/marketplace">Marketplace</Link>
-          <Link href="/portal">My transactions</Link>
+          <Link href="/sign-in?next=%2Fportal">My transactions</Link>
           <Link className="market-signin" href="/sign-in">
             Sign in
           </Link>
@@ -90,17 +72,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <strong>
               {product.price} {product.currency}
             </strong>
-            <span>Protected by TrustPay escrow</span>
+            <span>Protected payments are currently in pre-launch</span>
           </div>
-          <button className="buy-button" onClick={buy}>
-            Buy with TrustPay protection <span>→</span>
-          </button>
-          {message && <p className="product-message">{message}</p>}
+          <Link className="buy-button" href="/pre-launch">
+            Protected payments are in pre-launch <span>→</span>
+          </Link>
           <div className="buyer-protection">
             <span>✓</span>
             <div>
-              <strong>Your payment is protected</strong>
-              <p>Funds are released only after successful completion of the transaction.</p>
+              <strong>How protected payments work</strong>
+              <p>
+                When available, funds are held until the agreed conditions are met or a dispute is
+                resolved.
+              </p>
             </div>
           </div>
         </section>

@@ -9,6 +9,14 @@ type DashboardShellProps = Readonly<{
 export function DashboardShell({ area, items, children }: DashboardShellProps) {
   const basePath =
     area === 'Business' ? '/business' : area === 'Operations' ? '/operations' : '/portal';
+  const customerPaths: Record<string, string> = {
+    Home: '/portal',
+    'My Deals': '/portal/deals',
+    Invitations: '/portal/deals',
+    'Trust Profile': '/portal/trust',
+    Notifications: '/portal/notifications',
+    Profile: '/portal/trust'
+  };
 
   return (
     <main className="dashboard">
@@ -19,7 +27,7 @@ export function DashboardShell({ area, items, children }: DashboardShellProps) {
         <p className="area-label">{area}</p>
         <nav aria-label={`${area} navigation`}>
           {items.map((item) => (
-            <Link href={basePath} key={item}>
+            <Link href={area === 'Customer' ? (customerPaths[item] ?? basePath) : basePath} key={item}>
               {item}
             </Link>
           ))}

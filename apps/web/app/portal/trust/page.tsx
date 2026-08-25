@@ -26,19 +26,19 @@ export default function CustomerTrustPage() {
       <div className="cards">
         <article>
           <span>Verification</span>
-          <strong>{profile?.verificationLevel ?? '—'}</strong>
+          <strong>{profile?.verificationLevel ?? 'Not started'}</strong>
         </article>
         <article>
           <span>Trust score</span>
-          <strong>{profile?.score ?? '—'}</strong>
+          <strong>{profile?.score ?? 'Available after activity'}</strong>
         </article>
         <article>
           <span>Completed Deals</span>
-          <strong>{profile?.completedDeals ?? '—'}</strong>
+          <strong>{profile?.completedDeals ?? 'No completed transactions yet'}</strong>
         </article>
         <article>
           <span>Ratings</span>
-          <strong>{profile?.averageRating ?? '—'}</strong>
+          <strong>{profile?.averageRating ?? 'No ratings yet'}</strong>
         </article>
       </div>
     </DashboardShell>

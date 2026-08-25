@@ -141,6 +141,10 @@ article a {
   width: 100%;
 }
 
+.auth-brand {
+  margin-bottom: 8px;
+}
+
 label {
   display: grid;
   font-weight: 700;
@@ -178,8 +182,13 @@ button {
     padding: 22px;
   }
 
-  nav {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .sidebar nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sidebar nav a {
+    font-size: 13px;
+    padding: 9px;
   }
 
   .content {
@@ -2367,6 +2376,7 @@ td strong {
   font-size: 12px;
   justify-content: space-between;
   padding: 15px 17px;
+  text-decoration: none;
   width: 100%;
 }
 .buy-button span {

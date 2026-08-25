@@ -35,6 +35,11 @@ const useCases = [
     title: 'Business agreements',
     copy: 'Create trusted transactions between businesses.',
     examples: ['Supplier payments', 'Purchase agreements', 'Partnerships', 'B2B transactions']
+  },
+  {
+    title: 'Custom transactions',
+    copy: 'Set clear terms for agreements that do not fit a standard category.',
+    examples: ['Custom deposits', 'Milestone work', 'Shared assets', 'One-off agreements']
   }
 ];
 
@@ -46,24 +51,24 @@ const steps = [
   },
   {
     number: '02',
-    title: 'Protect the funds',
-    copy: 'Money is protected while the agreed conditions are being fulfilled.'
+    title: 'Prepare a protected transaction',
+    copy: 'Both parties record the terms while protected payment capability is being prepared for launch.'
   },
   {
     number: '03',
-    title: 'Complete the transaction',
+    title: 'Complete the agreement',
     copy: 'Goods are delivered, services are completed, or deposits are resolved.'
   },
   {
     number: '04',
-    title: 'Release funds with confidence',
-    copy: "Funds are released according to the agreed transaction conditions and TrustPay's protected process."
+    title: 'Release under agreed terms',
+    copy: 'When protected payments are available, funds can be released according to the agreed conditions.'
   }
 ];
 
 const securityPoints = [
   'Clear transaction terms',
-  'Protected payments',
+  'Protected payment capability in pre-launch',
   'Verified identities or sellers where available',
   'Transaction records',
   'Dispute support',
@@ -83,7 +88,7 @@ export default function HomePage() {
           <Link href="/marketplace">Marketplace</Link>
           <Link href="#businesses">For businesses</Link>
           <Link href="#trust-security">Trust & security</Link>
-          <Link className="market-signin" href="/pre-launch">
+          <Link className="market-signin" href="/sign-in">
             Sign in
           </Link>
         </nav>
@@ -98,7 +103,7 @@ export default function HomePage() {
             or entering an agreement, TrustPay helps both parties transact with confidence.
           </p>
           <div className="home-actions">
-            <Link className="hero-primary" href="/pre-launch">
+            <Link className="hero-primary" href="/sign-in?next=%2Fportal%2Fdeals%2Fcreate">
               Start a Protected Transaction <span>→</span>
             </Link>
             <Link className="hero-secondary" href="#how-it-works">
@@ -163,8 +168,8 @@ export default function HomePage() {
           <span className="market-eyebrow">Marketplace</span>
           <h2>Shop through the TrustPay Marketplace.</h2>
           <p>
-            Discover products and public Trust Profiles while using TrustPay protection. The
-            Marketplace is one way people and businesses can use the platform.
+            Explore the Marketplace and public Trust Profiles. The Marketplace is one way people
+            and businesses can use the TrustPay platform.
           </p>
         </div>
         <Link className="trust-cta home-inline-cta" href="/marketplace">
@@ -200,8 +205,9 @@ export default function HomePage() {
           <span className="market-eyebrow">Trust & security</span>
           <h2>Protection built into the transaction.</h2>
           <p>
-            TrustPay is designed around clear terms, protected payments, transaction records, and
-            dispute support. Verified identities and public seller profiles appear where available.
+            TrustPay helps parties agree clear terms and keep a shared transaction record. When
+            protected payments are available, funds are released only when the agreed conditions are
+            met. If something needs review, both parties can use the dispute process.
           </p>
         </div>
         <ul className="security-list">

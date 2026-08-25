@@ -28,9 +28,9 @@ export default function MarketplacePage() {
         <nav>
           <Link href="#categories">Categories</Link>
           <Link href="#how-it-works">How it works</Link>
-          <Link href="/pre-launch">My transactions</Link>
+          <Link href="/sign-in?next=%2Fportal">My transactions</Link>
           <Link href="/pre-launch">Become a seller</Link>
-          <Link className="market-signin" href="/pre-launch">
+          <Link className="market-signin" href="/sign-in">
             Sign in
           </Link>
         </nav>

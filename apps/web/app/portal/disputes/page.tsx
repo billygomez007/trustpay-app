@@ -90,7 +90,7 @@ export default function DisputesPage() {
         ))}
         {!cases.length && !loading && (
           <div className="customer-empty">
-            <strong>No disputes yet</strong>
+            <strong>You have no active disputes.</strong>
             <span>When a protected transaction needs review, the case will appear here.</span>
             <Link href="/portal/deals">View transactions →</Link>
           </div>
